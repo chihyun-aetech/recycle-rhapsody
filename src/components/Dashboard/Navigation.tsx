@@ -70,7 +70,7 @@ export const Navigation: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className="w-9 h-9"
+            className="w-9 h-9 hover:bg-muted border border-border/50"
           >
             {theme === 'light' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
@@ -80,7 +80,7 @@ export const Navigation: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-            className="w-9 h-9"
+            className="w-9 h-9 hover:bg-muted border border-border/50"
           >
             <Globe className="w-4 h-4" />
           </Button>
