@@ -63,7 +63,7 @@ export const AlertDropdown: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative w-9 h-9">
+        <Button variant="secondary" size="sm" className="relative w-9 h-9">
           <Bell className="w-4 h-4" />
           {alertData.length > 0 && (
             <Badge 

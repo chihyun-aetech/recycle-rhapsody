@@ -52,7 +52,9 @@ export const Navigation: React.FC = () => {
               onClick={() => setActiveTab(tab.key)}
               className={cn(
                 'transition-all duration-200',
-                activeTab === tab.key && 'bg-primary text-primary-foreground shadow-sm'
+                activeTab === tab.key 
+                  ? 'bg-primary text-primary-foreground shadow-sm' 
+                  : 'text-muted-foreground'
               )}
             >
               {tab.label}
@@ -95,7 +97,9 @@ export const Navigation: React.FC = () => {
                 onClick={() => setFontSize(size.key)}
                 className={cn(
                   'w-7 h-7 text-xs',
-                  fontSize === size.key && 'bg-primary text-primary-foreground'
+                  fontSize === size.key 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-muted-foreground'
                 )}
               >
                 {size.label}
