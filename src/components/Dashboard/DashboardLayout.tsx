@@ -64,6 +64,15 @@ export const DashboardLayout: React.FC = () => {
     large: 'text-lg',
   };
 
+  React.useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [theme]);
+
   return (
     <DashboardContext.Provider value={contextValue}>
       <div className={cn(

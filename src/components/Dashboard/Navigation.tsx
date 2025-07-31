@@ -2,6 +2,8 @@ import React from 'react';
 import { Bell, Sun, Moon, Globe, Type } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDashboard } from './DashboardLayout';
 import { AlertDropdown } from './AlertDropdown';
 
@@ -68,24 +70,49 @@ export const Navigation: React.FC = () => {
           <AlertDropdown />
           
           {/* Theme Toggle */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className="w-9 h-9"
-          >
-            {theme === 'light' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </Button>
+          <div className="flex items-center space-x-2 bg-muted rounded-lg p-2">
+            <Sun className="w-4 h-4 text-muted-foreground" />
+            <Switch
+              checked={theme === 'dark'}
+              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+            />
+            <Moon className="w-4 h-4 text-muted-foreground" />
+          </div>
 
           {/* Language Toggle */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-            className="w-9 h-9"
-          >
-            <Globe className="w-4 h-4" />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="w-9 h-9"
+              >
+                <Globe className="w-4 h-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2" align="end" side="bottom" sideOffset={8}>
+              <div className="flex flex-col space-y-1">
+                <Button
+                  variant={language === 'ko' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setLanguage('ko')}
+                  className="justify-start w-full"
+                >
+                  <span className="text-lg mr-2">🇰🇷</span>
+                  한국어
+                </Button>
+                <Button
+                  variant={language === 'en' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setLanguage('en')}
+                  className="justify-start w-full"
+                >
+                  <span className="text-lg mr-2">🇺🇸</span>
+                  English
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
 
           {/* Font Size */}
           <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
