@@ -33,7 +33,7 @@ const generatePeriodData = (startDate: Date, endDate: Date) => {
 
 export const StatsTab2: React.FC = () => {
   const { language } = useDashboard2();
-  const [startDate, setStartDate] = useState<Date>(new Date(2024, 0, 1));
+  const [startDate, setStartDate] = useState<Date>(new Date(2025, 6, 1)); // July 1, 2025
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [isStartCalendarOpen, setIsStartCalendarOpen] = useState(false);
   const [isEndCalendarOpen, setIsEndCalendarOpen] = useState(false);
