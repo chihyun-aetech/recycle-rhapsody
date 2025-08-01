@@ -75,7 +75,7 @@ export const AlertDropdown: React.FC = () => {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
+      <DropdownMenuContent align="end" className="w-64" sideOffset={8}>
         <div className="px-3 py-2 border-b">
           <h3 className="font-semibold">
             {language === 'ko' ? '알림' : 'Alerts'}

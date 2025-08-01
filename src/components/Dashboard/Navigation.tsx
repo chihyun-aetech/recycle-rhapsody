@@ -71,12 +71,18 @@ export const Navigation: React.FC = () => {
           
           {/* Theme Toggle */}
           <div className="flex items-center space-x-2 bg-muted rounded-lg p-2">
-            <Sun className="w-4 h-4 text-muted-foreground" />
+            <Sun className={cn(
+              "w-4 h-4 transition-colors",
+              theme === 'light' ? 'text-orange-500' : 'text-muted-foreground'
+            )} />
             <Switch
               checked={theme === 'dark'}
               onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
             />
-            <Moon className="w-4 h-4 text-muted-foreground" />
+            <Moon className={cn(
+              "w-4 h-4 transition-colors",
+              theme === 'dark' ? 'text-yellow-400' : 'text-muted-foreground'
+            )} />
           </div>
 
           {/* Language Toggle */}

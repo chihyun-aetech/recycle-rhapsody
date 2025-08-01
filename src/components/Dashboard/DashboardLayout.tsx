@@ -66,6 +66,11 @@ export const DashboardLayout: React.FC = () => {
 
   React.useEffect(() => {
     const root = document.documentElement;
+    root.style.setProperty('--font-size-multiplier', fontSize === 'small' ? '1' : fontSize === 'medium' ? '1.125' : '1.25');
+  }, [fontSize]);
+
+  React.useEffect(() => {
+    const root = document.documentElement;
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {
@@ -81,7 +86,7 @@ export const DashboardLayout: React.FC = () => {
         fontSizeClasses[fontSize]
       )}>
         <Navigation />
-        <main className="pt-16">
+        <main className="pt-16 dashboard-content">
           {activeTab === 'overview' && <OverviewTab />}
           {activeTab === 'monitoring' && <MonitoringTab />}
           {activeTab === 'stats' && <StatsTab />}

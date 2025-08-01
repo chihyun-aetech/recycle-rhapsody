@@ -42,7 +42,7 @@ export const PerformanceChart: React.FC = () => {
         return { 
           data: dailyData, 
           dataKey: 'throughput', 
-          color: '#3b82f6',
+          color: '#00A788',
           title: language === 'ko' ? '일일 처리량 추이' : 'Daily Throughput Trends'
         };
     }

@@ -55,6 +55,10 @@ All colors MUST be HSL.
     --dashboard-red: 0 84% 60%;
     --dashboard-yellow: 38 92% 50%;
     
+    /* Theme toggle colors */
+    --theme-sun: 25 95% 53%;
+    --theme-moon: 48 100% 67%;
+    
     /* Gradients */
     --gradient-blue: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 55%));
     --gradient-green: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 71% 45%));
@@ -132,5 +136,24 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Font size scaling based on selection */
+  .dashboard-content h1 {
+    font-size: calc(1.875rem * var(--font-size-multiplier, 1));
+  }
+  
+  .dashboard-content h2 {
+    font-size: calc(1.5rem * var(--font-size-multiplier, 1));
+  }
+  
+  .dashboard-content h3 {
+    font-size: calc(1.25rem * var(--font-size-multiplier, 1));
+  }
+  
+  .dashboard-content p, 
+  .dashboard-content span,
+  .dashboard-content div:not(.recharts-wrapper) {
+    font-size: calc(0.875rem * var(--font-size-multiplier, 1));
   }
 }
