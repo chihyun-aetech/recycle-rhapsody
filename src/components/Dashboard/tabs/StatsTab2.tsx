@@ -77,62 +77,66 @@ export const StatsTab2: React.FC = () => {
           <CardTitle>{language === 'ko' ? '기간 설정' : 'Date Range'}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium">
-                {language === 'ko' ? '시작일:' : 'Start Date:'}
-              </label>
-              <Popover open={isStartCalendarOpen} onOpenChange={setIsStartCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-40">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(startDate, 'yyyy-MM-dd')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={(date) => {
-                      if (date) {
-                        setStartDate(date);
-                        setIsStartCalendarOpen(false);
-                      }
-                    }}
-                    locale={language === 'ko' ? ko : undefined}
-                  />
-                </PopoverContent>
-              </Popover>
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-medium">
+                  {language === 'ko' ? '시작일:' : 'Start Date:'}
+                </label>
+                <Popover open={isStartCalendarOpen} onOpenChange={setIsStartCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full sm:w-40 justify-start">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(startDate, 'yyyy-MM-dd')}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={(date) => {
+                        if (date) {
+                          setStartDate(date);
+                          setIsStartCalendarOpen(false);
+                        }
+                      }}
+                      locale={language === 'ko' ? ko : undefined}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-medium">
+                  {language === 'ko' ? '종료일:' : 'End Date:'}
+                </label>
+                <Popover open={isEndCalendarOpen} onOpenChange={setIsEndCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full sm:w-40 justify-start">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(endDate, 'yyyy-MM-dd')}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={(date) => {
+                        if (date) {
+                          setEndDate(date);
+                          setIsEndCalendarOpen(false);
+                        }
+                      }}
+                      locale={language === 'ko' ? ko : undefined}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium">
-                {language === 'ko' ? '종료일:' : 'End Date:'}
-              </label>
-              <Popover open={isEndCalendarOpen} onOpenChange={setIsEndCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-40">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(endDate, 'yyyy-MM-dd')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={(date) => {
-                      if (date) {
-                        setEndDate(date);
-                        setIsEndCalendarOpen(false);
-                      }
-                    }}
-                    locale={language === 'ko' ? ko : undefined}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <Button onClick={exportToExcel} className="ml-auto">
+            <Button onClick={exportToExcel} className="w-full sm:w-auto">
               <Download className="mr-2 h-4 w-4" />
               {language === 'ko' ? 'Excel 내보내기' : 'Export Excel'}
             </Button>

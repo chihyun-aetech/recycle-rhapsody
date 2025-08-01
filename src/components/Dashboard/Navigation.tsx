@@ -33,19 +33,19 @@ export const Navigation: React.FC = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card border-b border-border backdrop-blur-sm">
-      <div className="flex items-center justify-between px-6 py-3">
+      <div className="flex items-center justify-between px-4 lg:px-6 py-3">
         {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-blue rounded-lg flex items-center justify-center">
+        <div className="flex items-center space-x-2 min-w-0">
+          <div className="w-8 h-8 bg-gradient-blue rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-lg">A</span>
           </div>
-          <span className="font-bold text-xl text-foreground">
+          <span className="font-bold text-lg lg:text-xl text-foreground truncate">
             {language === 'ko' ? '폐기물 처리 시스템' : 'Waste Processing System'}
           </span>
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
+        <div className="hidden md:flex items-center space-x-1 bg-muted rounded-lg p-1">
           {tabs.map((tab) => (
             <Button
               key={tab.key}
@@ -64,13 +64,39 @@ export const Navigation: React.FC = () => {
           ))}
         </div>
 
+        {/* Mobile Tab Dropdown */}
+        <div className="flex md:hidden">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm">
+                {tabs.find(tab => tab.key === activeTab)?.label}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2" align="center">
+              <div className="flex flex-col space-y-1">
+                {tabs.map((tab) => (
+                  <Button
+                    key={tab.key}
+                    variant={activeTab === tab.key ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setActiveTab(tab.key)}
+                    className="justify-start w-full"
+                  >
+                    {tab.label}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+
         {/* Controls */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 lg:space-x-2">
           {/* Alert Dropdown */}
           <AlertDropdown />
           
           {/* Theme Toggle */}
-          <div className="flex items-center space-x-2 bg-muted rounded-lg p-2">
+          <div className="hidden sm:flex items-center space-x-2 bg-muted rounded-lg p-2">
             <Sun className={cn(
               "w-4 h-4 transition-colors",
               theme === 'light' ? 'text-orange-500' : 'text-muted-foreground'
@@ -121,7 +147,7 @@ export const Navigation: React.FC = () => {
           </Popover>
 
           {/* Font Size */}
-          <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
+          <div className="hidden lg:flex items-center space-x-1 bg-muted rounded-lg p-1">
             {fontSizes.map((size) => (
               <Button
                 key={size.key}
