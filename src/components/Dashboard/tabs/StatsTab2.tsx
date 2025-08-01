@@ -26,6 +26,13 @@ const generatePeriodData = (startDate: Date, endDate: Date) => {
       revenue: Math.floor(Math.random() * 50000) + 80000,
       processing: Math.floor(Math.random() * 500) + 800,
       analysis: Math.floor(Math.random() * 300) + 600,
+      wastePET: Math.floor(Math.random() * 200) + 150,
+      wastePE: Math.floor(Math.random() * 180) + 120,
+      wastePP: Math.floor(Math.random() * 150) + 100,
+      wastePS: Math.floor(Math.random() * 120) + 80,
+      wasteGlass: Math.floor(Math.random() * 80) + 40,
+      wasteCan: Math.floor(Math.random() * 60) + 30,
+      wastePaper: Math.floor(Math.random() * 40) + 20,
     });
   }
   return data;
@@ -46,6 +53,13 @@ export const StatsTab2: React.FC = () => {
       [language === 'ko' ? '총 수입 (원)' : 'Total Revenue (KRW)']: item.revenue,
       [language === 'ko' ? '처리량 (개)' : 'Processing (Items)']: item.processing,
       [language === 'ko' ? '분석량 (건)' : 'Analysis (Cases)']: item.analysis,
+      [language === 'ko' ? 'PET 처리량' : 'PET Processing']: item.wastePET,
+      [language === 'ko' ? 'PE 처리량' : 'PE Processing']: item.wastePE,
+      [language === 'ko' ? 'PP 처리량' : 'PP Processing']: item.wastePP,
+      [language === 'ko' ? 'PS 처리량' : 'PS Processing']: item.wastePS,
+      [language === 'ko' ? 'Glass 처리량' : 'Glass Processing']: item.wasteGlass,
+      [language === 'ko' ? 'Can 처리량' : 'Can Processing']: item.wasteCan,
+      [language === 'ko' ? 'Paper 처리량' : 'Paper Processing']: item.wastePaper,
     }));
 
     const ws = XLSX.utils.json_to_sheet(exportData);
@@ -259,6 +273,13 @@ export const StatsTab2: React.FC = () => {
                   <TableHead>{language === 'ko' ? '수입 (원)' : 'Revenue (KRW)'}</TableHead>
                   <TableHead>{language === 'ko' ? '처리량' : 'Processing'}</TableHead>
                   <TableHead>{language === 'ko' ? '분석량' : 'Analysis'}</TableHead>
+                  <TableHead>PET</TableHead>
+                  <TableHead>PE</TableHead>
+                  <TableHead>PP</TableHead>
+                  <TableHead>PS</TableHead>
+                  <TableHead>Glass</TableHead>
+                  <TableHead>Can</TableHead>
+                  <TableHead>Paper</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -268,6 +289,13 @@ export const StatsTab2: React.FC = () => {
                     <TableCell>₩{item.revenue.toLocaleString()}</TableCell>
                     <TableCell>{item.processing.toLocaleString()}</TableCell>
                     <TableCell>{item.analysis.toLocaleString()}</TableCell>
+                    <TableCell>{item.wastePET.toLocaleString()}</TableCell>
+                    <TableCell>{item.wastePE.toLocaleString()}</TableCell>
+                    <TableCell>{item.wastePP.toLocaleString()}</TableCell>
+                    <TableCell>{item.wastePS.toLocaleString()}</TableCell>
+                    <TableCell>{item.wasteGlass.toLocaleString()}</TableCell>
+                    <TableCell>{item.wasteCan.toLocaleString()}</TableCell>
+                    <TableCell>{item.wastePaper.toLocaleString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

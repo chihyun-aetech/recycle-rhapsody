@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Activity, Zap, AlertTriangle, CheckCircle, DollarSign, BarChart3, Clock } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { WasteDistribution2 } from '../components/WasteDistribution2';
 
 const metricsData = [
   {
@@ -227,30 +228,34 @@ export const OverviewTab2: React.FC = () => {
         </div>
       </div>
 
-      {/* Production Lines Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{language === 'ko' ? '생산 라인 현황' : 'Production Lines Status'}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {statusData.map((line, index) => (
-              <div key={index} className="flex items-center justify-between p-4 rounded-lg border bg-card/50">
-                <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 rounded-full bg-primary"></div>
-                  <span className="font-medium">
-                    {language === 'ko' ? `라인 ${line.line}` : `Line ${line.line}`}
-                  </span>
+      {/* Production Lines Status and Waste Distribution */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{language === 'ko' ? '생산 라인 현황' : 'Production Lines Status'}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {statusData.map((line, index) => (
+                <div key={index} className="flex items-center justify-between p-4 rounded-lg border bg-card/50">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 rounded-full bg-primary"></div>
+                    <span className="font-medium">
+                      {language === 'ko' ? `라인 ${line.line}` : `Line ${line.line}`}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm font-medium">{line.throughput} {language === 'ko' ? '개/시간' : 'items/hr'}</span>
+                    {getStatusBadge(line.status)}
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <span className="text-sm font-medium">{line.throughput} {language === 'ko' ? '개/시간' : 'items/hr'}</span>
-                  {getStatusBadge(line.status)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <WasteDistribution2 />
+      </div>
     </div>
   );
 };
