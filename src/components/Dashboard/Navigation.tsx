@@ -112,39 +112,41 @@ export const Navigation: React.FC = () => {
           </div>
 
           {/* Language Toggle */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="w-9 h-9"
-              >
-                <Globe className="w-4 h-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-2" align="end" side="bottom" sideOffset={8}>
-              <div className="flex flex-col space-y-1">
+          <div className="hidden lg:block">
+            <Popover>
+              <PopoverTrigger asChild>
                 <Button
-                  variant={language === 'ko' ? 'default' : 'ghost'}
+                  variant="secondary"
                   size="sm"
-                  onClick={() => setLanguage('ko')}
-                  className="justify-start w-full"
+                  className="w-9 h-9"
                 >
-                  <span className="text-lg mr-2">🇰🇷</span>
-                  한국어
+                  <Globe className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant={language === 'en' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setLanguage('en')}
-                  className="justify-start w-full"
-                >
-                  <span className="text-lg mr-2">🇺🇸</span>
-                  English
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-2" align="end" side="bottom" sideOffset={8}>
+                <div className="flex flex-col space-y-1">
+                  <Button
+                    variant={language === 'ko' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setLanguage('ko')}
+                    className="justify-start w-full"
+                  >
+                    <span className="text-lg mr-2">🇰🇷</span>
+                    한국어
+                  </Button>
+                  <Button
+                    variant={language === 'en' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setLanguage('en')}
+                    className="justify-start w-full"
+                  >
+                    <span className="text-lg mr-2">🇺🇸</span>
+                    English
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
 
           {/* Font Size */}
           <div className="hidden lg:flex items-center space-x-1 bg-muted rounded-lg p-1">
