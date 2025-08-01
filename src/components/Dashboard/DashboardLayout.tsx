@@ -4,6 +4,10 @@ import { Navigation } from './Navigation';
 import { OverviewTab } from './tabs/OverviewTab';
 import { MonitoringTab } from './tabs/MonitoringTab';
 import { StatsTab } from './tabs/StatsTab';
+import { Sun, Moon, Globe, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 type Tab = 'overview' | 'monitoring' | 'stats';
 type FontSize = 'small' | 'medium' | 'large';
@@ -78,6 +82,12 @@ export const DashboardLayout: React.FC = () => {
     }
   }, [theme]);
 
+  const fontSizes = [
+    { key: 'small' as const, label: 'S' },
+    { key: 'medium' as const, label: 'M' },
+    { key: 'large' as const, label: 'L' },
+  ];
+
   return (
     <DashboardContext.Provider value={contextValue}>
       <div className={cn(
@@ -91,6 +101,78 @@ export const DashboardLayout: React.FC = () => {
           {activeTab === 'monitoring' && <MonitoringTab />}
           {activeTab === 'stats' && <StatsTab />}
         </main>
+        
+        {/* Floating Settings Button - visible when navigation controls are hidden */}
+        <div className="fixed bottom-6 right-6 z-50 lg:hidden">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button size="icon" className="rounded-full shadow-lg">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-48">
+              <div className="p-2 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">
+                    {language === 'ko' ? '테마' : 'Theme'}
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    <Sun className={cn(
+                      "w-4 h-4 transition-colors",
+                      theme === 'light' ? 'text-orange-500' : 'text-muted-foreground'
+                    )} />
+                    <Switch
+                      checked={theme === 'dark'}
+                      onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                    />
+                    <Moon className={cn(
+                      "w-4 h-4 transition-colors",
+                      theme === 'dark' ? 'text-yellow-400' : 'text-muted-foreground'
+                    )} />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">
+                    {language === 'ko' ? '언어' : 'Language'}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+                  >
+                    <Globe className="h-4 w-4" />
+                    <span className="ml-1 text-xs">
+                      {language === 'ko' ? '🇰🇷' : '🇺🇸'}
+                    </span>
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">
+                    {language === 'ko' ? '글자 크기' : 'Font Size'}
+                  </span>
+                  <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
+                    {fontSizes.map((size) => (
+                      <Button
+                        key={size.key}
+                        variant={fontSize === size.key ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setFontSize(size.key)}
+                        className={cn(
+                          'w-6 h-6 text-xs',
+                          fontSize === size.key 
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'text-muted-foreground'
+                        )}
+                      >
+                        {size.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
     </DashboardContext.Provider>
   );
