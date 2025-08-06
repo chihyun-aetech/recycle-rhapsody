@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDashboard } from './DashboardLayout';
 import { AlertDropdown } from './AlertDropdown';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const Navigation: React.FC = () => {
   const { 
@@ -18,6 +19,17 @@ export const Navigation: React.FC = () => {
     language, 
     setLanguage 
   } = useDashboard();
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleTitleClick = () => {
+    if (location.pathname === '/') {
+      navigate('/design2');
+    } else {
+      navigate('/');
+    }
+  };
 
   const tabs = [
     { key: 'overview' as const, label: language === 'ko' ? '개요' : 'Overview' },
@@ -39,9 +51,12 @@ export const Navigation: React.FC = () => {
           <div className="w-8 h-8 bg-gradient-blue rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-lg">A</span>
           </div>
-          <span className="font-bold text-lg lg:text-xl text-foreground truncate">
+          <h1 
+            className="font-bold text-lg lg:text-xl text-foreground truncate cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={handleTitleClick}
+          >
             {language === 'ko' ? '폐기물 처리 시스템' : 'Waste Processing System'}
-          </span>
+          </h1>
         </div>
 
         {/* Tabs */}
