@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Camera, Settings, Package, Cpu, Zap, Wrench } from 'lucide-react';
+import { Camera, Package, Cpu, Zap } from 'lucide-react';
 import { useDashboard } from '../DashboardLayout';
 import { cn } from '@/lib/utils';
 import {
@@ -16,6 +16,8 @@ import {
   Connection,
   Edge,
   Node,
+  Handle,
+  Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -32,12 +34,44 @@ const equipmentList: Equipment[] = [
   { id: 'vision-box-1', name: 'Vision Box #1', nameKo: 'Vision Box #1', icon: <Camera className="w-4 h-4" />, status: 'online', type: 'camera' },
   { id: 'vision-box-2', name: 'Vision Box #2', nameKo: 'Vision Box #2', icon: <Camera className="w-4 h-4" />, status: 'warning', type: 'camera' },
   { id: 'vision-box-3', name: 'Vision Box #3', nameKo: 'Vision Box #3', icon: <Camera className="w-4 h-4" />, status: 'offline', type: 'camera' },
-  { id: 'conveyor-1', name: 'Conveyor Board #1', nameKo: '컨베이어 보드 #1', icon: <Settings className="w-4 h-4" />, status: 'online', type: 'input' },
-  { id: 'component-1', name: 'Component #1', nameKo: '부품 #1', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron' },
-  { id: 'torque-1', name: 'Torque Ball #1', nameKo: '토크 볼 #1', icon: <Zap className="w-4 h-4" />, status: 'offline', type: 'output' },
-  { id: 'input-1', name: 'Input #1', nameKo: 'Input #1', icon: <Package className="w-4 h-4" />, status: 'online', type: 'input' },
-  { id: 'atron-1', name: 'Atron H/W #1', nameKo: 'Atron H/W #1', icon: <Wrench className="w-4 h-4" />, status: 'online', type: 'atron' },
+  { id: 'atron-1', name: 'Atron H/W #1', nameKo: 'Atron H/W #1', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron' },
+  { id: 'atron-2', name: 'Atron H/W #2', nameKo: 'Atron H/W #2', icon: <Cpu className="w-4 h-4" />, status: 'warning', type: 'atron' },
+  { id: 'input-1', name: 'Input', nameKo: 'Input', icon: <Package className="w-4 h-4" />, status: 'online', type: 'input' },
+  { id: 'output-1', name: 'Output', nameKo: 'Output', icon: <Zap className="w-4 h-4" />, status: 'online', type: 'output' },
 ];
+
+// Custom node component with handles on all sides
+const CustomNode = ({ data, id }: { data: any, id: string }) => {
+  return (
+    <div className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm">
+      <Handle
+        type="target"
+        position={Position.Top}
+        id="top"
+        style={{ background: '#555' }}
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="left"
+        style={{ background: '#555' }}
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right"
+        style={{ background: '#555' }}
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="bottom"
+        style={{ background: '#555' }}
+      />
+      {data.label}
+    </div>
+  );
+};
 
 const lines = ['Line1', 'Line2', 'Line3', 'Line4'];
 
@@ -61,13 +95,26 @@ const getStatusText = (status: string, language: string): string => {
 
 export const ProcessingLineFlow: React.FC = () => {
   const { language } = useDashboard();
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment[]>([]);
+  
+  // Set initial equipment: Input => Vision Box #1 => Atron H/W #1 => Output
+  const initialEquipment = [
+    equipmentList.find(eq => eq.id === 'input-1')!,
+    equipmentList.find(eq => eq.id === 'vision-box-1')!,
+    equipmentList.find(eq => eq.id === 'atron-1')!,
+    equipmentList.find(eq => eq.id === 'output-1')!,
+  ];
+  
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment[]>(initialEquipment);
   const [selectedLine, setSelectedLine] = useState<string>('Line1');
+  
+  const nodeTypes = {
+    custom: CustomNode,
+  };
 
   // Initial nodes for the flow
   const initialNodes: Node[] = selectedEquipment.map((eq, index) => ({
     id: eq.id,
-    type: 'default',
+    type: 'custom',
     position: { x: index * 200, y: 100 },
     data: { 
       label: (
@@ -104,7 +151,7 @@ export const ProcessingLineFlow: React.FC = () => {
   React.useEffect(() => {
     const newNodes = selectedEquipment.map((eq, index) => ({
       id: eq.id,
-      type: 'default',
+      type: 'custom',
       position: { x: index * 200, y: 100 },
       data: { 
         label: (
@@ -175,10 +222,10 @@ export const ProcessingLineFlow: React.FC = () => {
               </div>
             </div>
 
-            {/* Equipment List */}
+            {/* Component List */}
             <div>
               <h4 className="text-sm font-medium mb-2">
-                {language === 'ko' ? '장비 목록' : 'Equipment List'}
+                {language === 'ko' ? '구성요소 목록' : 'Component List'}
               </h4>
               <ScrollArea className="h-64">
                 <div className="space-y-2">
@@ -217,6 +264,7 @@ export const ProcessingLineFlow: React.FC = () => {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
+              nodeTypes={nodeTypes}
               fitView
               attributionPosition="top-right"
             >
