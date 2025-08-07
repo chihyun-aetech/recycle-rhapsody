@@ -200,7 +200,7 @@ export const ProcessingLineFlow: React.FC = () => {
       <CardContent>
         <div className="flex h-96 space-x-4">
           {/* Left Panel - Equipment List */}
-          <div className="w-80 border rounded-lg p-4 bg-muted/20">
+          <div className="w-80 border rounded-lg p-4 bg-muted/20 flex flex-col">
             {/* Minimap */}
             <div className="mb-4">
               <h4 className="text-sm font-medium mb-2">
@@ -225,12 +225,12 @@ export const ProcessingLineFlow: React.FC = () => {
             </div>
 
             {/* Component List */}
-            <div>
+            <div className="flex-1 flex flex-col min-h-0">
               <h4 className="text-sm font-medium mb-2">
                 {language === 'ko' ? '구성요소 목록' : 'Component List'}
               </h4>
-              <ScrollArea className="h-64">
-                <div className="space-y-2">
+              <ScrollArea className="flex-1">
+                <div className="space-y-2 pr-2">
                   {equipmentList.map((equipment) => (
                     <div
                       key={equipment.id}
@@ -267,6 +267,8 @@ export const ProcessingLineFlow: React.FC = () => {
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               nodeTypes={nodeTypes}
+              edgesReconnectable={true}
+              reconnectRadius={20}
               fitView
               attributionPosition="top-right"
             >
