@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useDashboard2 } from '../DashboardLayout2';
+import { useDashboard } from '../DashboardLayout';
 import { cn } from '@/lib/utils';
 
 interface LogEntry {
@@ -94,7 +94,8 @@ const logsData: LogEntry[] = [
 ];
 
 export const SystemLogs: React.FC = () => {
-  const { language, focusedLogId, setFocusedLogId } = useDashboard2();
+  const { language } = useDashboard();
+  const [focusedLogId, setFocusedLogId] = React.useState<string | null>(null);
 
   const getSeverityBadge = (severity: string) => {
     switch (severity) {

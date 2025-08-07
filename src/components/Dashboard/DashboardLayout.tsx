@@ -2,8 +2,8 @@ import React, { useState, createContext, useContext } from 'react';
 import { cn } from '@/lib/utils';
 import { Navigation } from './Navigation';
 import { OverviewTab } from './tabs/OverviewTab';
-import { MonitoringTab } from './tabs/MonitoringTab';
-import { StatsTab } from './tabs/StatsTab';
+import { IntegratedMonitoringTab } from './tabs/IntegratedMonitoringTab';
+import { StatsTab2 } from './tabs/StatsTab2';
 import { Sun, Moon, Globe, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -98,8 +98,8 @@ export const DashboardLayout: React.FC = () => {
         <Navigation />
         <main className="pt-16 dashboard-content">
           {activeTab === 'overview' && <OverviewTab />}
-          {activeTab === 'monitoring' && <MonitoringTab />}
-          {activeTab === 'stats' && <StatsTab />}
+          {activeTab === 'monitoring' && <IntegratedMonitoringTab />}
+          {activeTab === 'stats' && <StatsTab2 />}
         </main>
         
         {/* Floating Settings Button - visible when navigation controls are hidden */}
