@@ -21,6 +21,8 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+// Force cache refresh - removed Settings icon dependency
+
 interface Equipment {
   id: string;
   name: string;
