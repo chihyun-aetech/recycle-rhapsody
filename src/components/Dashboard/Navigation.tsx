@@ -55,7 +55,7 @@ export const Navigation: React.FC = () => {
             className="font-bold text-lg lg:text-xl text-foreground truncate cursor-pointer hover:opacity-80 transition-opacity"
             onClick={handleTitleClick}
           >
-            {language === 'ko' ? '폐기물 처리 시스템' : 'Waste Processing System'}
+            Atronet
           </h1>
         </div>
 
