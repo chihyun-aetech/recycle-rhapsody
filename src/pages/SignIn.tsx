@@ -6,51 +6,81 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 const SignUp = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordCheck, setShowPasswordCheck] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    passwordCheck: '',
+    name: '',
+    phone: ''
+  });
+
+  const handleSubmit = () => {
+    if (formData.password !== formData.passwordCheck) {
+      toast({
+        title: "비밀번호 확인",
+        description: "비밀번호가 일치하지 않습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    toast({
+      title: "회원가입 완료",
+      description: "성공적으로 가입되었습니다.",
+    });
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] bg-gray-800 border-gray-700">
+      <DialogContent className="sm:max-w-[500px] bg-white/95 backdrop-blur-md border-gray-200">
         <DialogHeader>
-          <DialogTitle className="text-center text-white text-xl">
-            Welcome to Aetech Data Labeling System!
+          <DialogTitle className="text-center text-gray-800 text-xl font-semibold">
+            Aetech 회원가입
           </DialogTitle>
-          <p className="text-center text-gray-300 text-sm">
-            Please enter the information.
+          <p className="text-center text-gray-600 text-sm">
+            회원 정보를 입력해주세요
           </p>
         </DialogHeader>
-        <div className="grid grid-cols-1 gap-4 p-6">
+        <div className="space-y-4 p-6">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-white">
-              E-mail <span className="text-red-500">*</span>
+            <Label htmlFor="signup-email" className="text-gray-700 font-medium">
+              이메일 <span className="text-red-500">*</span>
             </Label>
             <Input
-              id="email"
-              placeholder="E-mail"
-              className="bg-gray-200 border-gray-600 text-gray-900"
+              id="signup-email"
+              placeholder="이메일을 입력하세요"
+              value={formData.email}
+              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              className="bg-white border-gray-300 text-gray-900 focus:border-blue-500"
             />
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white">
-                Password <span className="text-red-500">*</span>
+              <Label htmlFor="signup-password" className="text-gray-700 font-medium">
+                비밀번호 <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Input
-                  id="password"
+                  id="signup-password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  className="bg-gray-200 border-gray-600 text-gray-900 pr-10"
+                  placeholder="비밀번호"
+                  value={formData.password}
+                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  className="bg-white border-gray-300 text-gray-900 focus:border-blue-500 pr-10"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-gray-100"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -63,21 +93,23 @@ const SignUp = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="passwordCheck" className="text-white">
-                Password Check <span className="text-red-500">*</span>
+              <Label htmlFor="signup-passwordCheck" className="text-gray-700 font-medium">
+                비밀번호 확인 <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Input
-                  id="passwordCheck"
+                  id="signup-passwordCheck"
                   type={showPasswordCheck ? "text" : "password"}
-                  placeholder="Password Check"
-                  className="bg-gray-200 border-gray-600 text-gray-900 pr-10"
+                  placeholder="비밀번호 확인"
+                  value={formData.passwordCheck}
+                  onChange={(e) => setFormData(prev => ({ ...prev, passwordCheck: e.target.value }))}
+                  className="bg-white border-gray-300 text-gray-900 focus:border-blue-500 pr-10"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-gray-100"
                   onClick={() => setShowPasswordCheck(!showPasswordCheck)}
                 >
                   {showPasswordCheck ? (
@@ -92,38 +124,45 @@ const SignUp = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-white">
-                Name <span className="text-red-500">*</span>
+              <Label htmlFor="signup-name" className="text-gray-700 font-medium">
+                이름 <span className="text-red-500">*</span>
               </Label>
               <Input
-                id="name"
-                placeholder="Name"
-                className="bg-gray-200 border-gray-600 text-gray-900"
+                id="signup-name"
+                placeholder="이름을 입력하세요"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                className="bg-white border-gray-300 text-gray-900 focus:border-blue-500"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-white">
-                Phone <span className="text-red-500">*</span>
+              <Label htmlFor="signup-phone" className="text-gray-700 font-medium">
+                전화번호 <span className="text-red-500">*</span>
               </Label>
               <Input
-                id="phone"
-                placeholder="010-1000-1000"
-                className="bg-gray-200 border-gray-600 text-gray-900"
+                id="signup-phone"
+                placeholder="010-0000-0000"
+                value={formData.phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                className="bg-white border-gray-300 text-gray-900 focus:border-blue-500"
               />
             </div>
           </div>
           
-          <div className="flex justify-end gap-4 mt-6">
+          <div className="flex justify-end gap-3 mt-8">
             <Button
               onClick={onClose}
-              variant="secondary"
-              className="px-8 bg-gray-600 hover:bg-gray-700 text-white"
+              variant="outline"
+              className="px-6 border-gray-300 text-gray-700 hover:bg-gray-50"
             >
-              Cancel
+              취소
             </Button>
-            <Button className="px-8 bg-emerald-600 hover:bg-emerald-700 text-white">
-              Join
+            <Button 
+              onClick={handleSubmit}
+              className="px-6 bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              가입하기
             </Button>
           </div>
         </div>
@@ -136,39 +175,69 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    if (email === 'admin@aetech.co.kr' && password === 'admin1234') {
+      localStorage.setItem('isAdmin', 'true');
+      localStorage.setItem('userEmail', email);
+      toast({
+        title: "로그인 성공",
+        description: "관리자로 로그인되었습니다.",
+      });
+      navigate('/');
+    } else {
+      toast({
+        title: "로그인 실패",
+        description: "아이디 또는 비밀번호를 확인해주세요.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-800 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-gray-800 border-gray-700">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-white/10 backdrop-blur-md border-white/20 shadow-2xl">
         <CardHeader className="text-center pb-8">
-          <h1 className="text-4xl font-light text-emerald-400 mb-8">aetech</h1>
+          <h1 className="text-4xl font-light text-white mb-2">aetech</h1>
+          <p className="text-white/70 text-sm">Data Labeling System</p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
+            <Label htmlFor="email" className="text-white/90 text-sm">이메일</Label>
             <Input
-              placeholder="User ID"
-              className="bg-gray-200 border-gray-600 text-gray-900"
+              id="email"
+              placeholder="admin@aetech.co.kr"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-blue-400"
             />
           </div>
           
           <div className="space-y-2">
+            <Label htmlFor="password" className="text-white/90 text-sm">비밀번호</Label>
             <div className="relative">
               <Input
+                id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className="bg-gray-200 border-gray-600 text-gray-900 pr-10"
+                placeholder="admin1234"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-blue-400 pr-10"
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-white/10"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-600" />
+                  <EyeOff className="h-4 w-4 text-white/70" />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-600" />
+                  <Eye className="h-4 w-4 text-white/70" />
                 )}
               </Button>
             </div>
@@ -179,24 +248,27 @@ const SignIn = () => {
               id="remember"
               checked={rememberMe}
               onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-              className="border-gray-400"
+              className="border-white/40 data-[state=checked]:bg-blue-500"
             />
-            <Label htmlFor="remember" className="text-white text-sm">
+            <Label htmlFor="remember" className="text-white/90 text-sm">
               아이디 저장
             </Label>
           </div>
           
-          <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3">
-            Log in
+          <Button 
+            onClick={handleLogin}
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 shadow-lg"
+          >
+            로그인
           </Button>
           
           <div className="text-center">
             <Button
               variant="link"
-              className="text-emerald-400 hover:text-emerald-300"
+              className="text-blue-300 hover:text-blue-200"
               onClick={() => setShowSignUp(true)}
             >
-              Sign Up
+              회원가입
             </Button>
           </div>
         </CardContent>

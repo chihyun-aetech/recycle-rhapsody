@@ -28,10 +28,13 @@ export const Navigation: React.FC = () => {
     navigate('/');
   };
 
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+  
   const tabs = [
     { key: 'overview' as const, label: language === 'ko' ? '개요' : 'Overview' },
     { key: 'monitoring' as const, label: language === 'ko' ? '모니터링' : 'Monitoring' },
     { key: 'stats' as const, label: language === 'ko' ? '통계' : 'Stats' },
+    ...(isAdmin ? [{ key: 'admin' as const, label: language === 'ko' ? '관리자' : 'Admin' }] : []),
   ];
 
   const fontSizes = [
@@ -63,10 +66,16 @@ export const Navigation: React.FC = () => {
               key={tab.key}
               variant={activeTab === tab.key ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => {
+                if (tab.key === 'admin') {
+                  navigate('/admin');
+                } else {
+                  setActiveTab(tab.key);
+                }
+              }}
               className={cn(
                 'transition-all duration-200',
-                activeTab === tab.key 
+                activeTab === tab.key || (tab.key === 'admin' && location.pathname === '/admin')
                   ? 'bg-primary text-primary-foreground shadow-sm' 
                   : 'text-muted-foreground'
               )}
@@ -89,9 +98,15 @@ export const Navigation: React.FC = () => {
                 {tabs.map((tab) => (
                   <Button
                     key={tab.key}
-                    variant={activeTab === tab.key ? 'default' : 'ghost'}
+                    variant={activeTab === tab.key || (tab.key === 'admin' && location.pathname === '/admin') ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setActiveTab(tab.key)}
+                    onClick={() => {
+                      if (tab.key === 'admin') {
+                        navigate('/admin');
+                      } else {
+                        setActiveTab(tab.key);
+                      }
+                    }}
                     className="justify-start w-full"
                   >
                     {tab.label}
