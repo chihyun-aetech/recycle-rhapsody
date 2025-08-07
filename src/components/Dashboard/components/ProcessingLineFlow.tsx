@@ -7,7 +7,6 @@ import { useDashboard } from '../DashboardLayout';
 import { cn } from '@/lib/utils';
 import {
   ReactFlow,
-  MiniMap,
   Controls,
   Background,
   useNodesState,
@@ -45,7 +44,7 @@ const equipmentList: Equipment[] = [
 // Custom node component with handles on all sides
 const CustomNode = ({ data, id }: { data: any, id: string }) => {
   return (
-    <div className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm">
+    <div className="px-4 py-2 bg-background dark:bg-gray-700 border border-border dark:border-gray-600 rounded-lg shadow-sm text-foreground dark:text-white">
       <Handle
         type="target"
         position={Position.Top}
@@ -259,7 +258,7 @@ export const ProcessingLineFlow: React.FC = () => {
           </div>
 
           {/* Right Panel - Flow Chart */}
-          <div className="flex-1 border rounded-lg bg-muted/20">
+          <div className="flex-1 border rounded-lg bg-muted/20 dark:bg-gray-800 dark:border-gray-600">
             <ReactFlow
               nodes={nodes}
               edges={edges}
@@ -271,10 +270,15 @@ export const ProcessingLineFlow: React.FC = () => {
               reconnectRadius={20}
               fitView
               attributionPosition="top-right"
+              style={{ 
+                backgroundColor: 'transparent'
+              }}
             >
-              <MiniMap />
-              <Controls />
-              <Background />
+              <Controls className="dark:bg-gray-700 dark:border-gray-600 [&>button]:dark:bg-gray-600 [&>button]:dark:text-white [&>button]:dark:border-gray-500" />
+              <Background 
+                color="#94a3b8" 
+                className="dark:opacity-20"
+              />
             </ReactFlow>
           </div>
         </div>
