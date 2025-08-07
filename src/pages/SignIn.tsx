@@ -202,7 +202,7 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen bg-gray-800 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-gray-800 border-none shadow-none">
+      <Card className="w-full max-w-md bg-gray-800 border border-gray-600 shadow-lg">
         <CardHeader className="text-center pb-8">
           <h1 className="text-4xl font-light text-teal-400 mb-2">Atronet</h1>
         </CardHeader>
