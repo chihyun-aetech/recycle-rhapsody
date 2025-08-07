@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useDashboard2 } from '../DashboardLayout2';
+import { useDashboard } from '../DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -39,7 +39,7 @@ const generatePeriodData = (startDate: Date, endDate: Date) => {
 };
 
 export const StatsTab2: React.FC = () => {
-  const { language } = useDashboard2();
+  const { language } = useDashboard();
   const [startDate, setStartDate] = useState<Date>(new Date(2025, 6, 1)); // July 1, 2025
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [isStartCalendarOpen, setIsStartCalendarOpen] = useState(false);
