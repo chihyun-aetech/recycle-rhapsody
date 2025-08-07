@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDashboard } from './DashboardLayout';
 import { AlertDropdown } from './AlertDropdown';
+import { UserDropdown } from './UserDropdown';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export const Navigation: React.FC = () => {
@@ -24,11 +25,7 @@ export const Navigation: React.FC = () => {
   const navigate = useNavigate();
 
   const handleTitleClick = () => {
-    if (location.pathname === '/') {
-      navigate('/design2');
-    } else {
-      navigate('/');
-    }
+    navigate('/');
   };
 
   const tabs = [
@@ -109,6 +106,9 @@ export const Navigation: React.FC = () => {
         <div className="flex items-center space-x-1 lg:space-x-2">
           {/* Alert Dropdown */}
           <AlertDropdown />
+          
+          {/* User Dropdown */}
+          <UserDropdown language={language} />
           
           {/* Theme Toggle */}
           <div className="hidden sm:flex items-center space-x-2 bg-muted rounded-lg p-2">
