@@ -10,27 +10,37 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, LogOut, UserX } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface UserDropdownProps {
   language: 'ko' | 'en';
 }
 
 export const UserDropdown: React.FC<UserDropdownProps> = ({ language }) => {
-  // Mock user data - replace with actual user data from context/auth
-  const userData = {
-    name: "김철수",
-    email: "kimcs@aetech.com",
-    phone: "010-1234-5678"
-  };
+  const { user, logout, deleteAccount } = useAuth();
+  const navigate = useNavigate();
+
+  if (!user) return null;
 
   const handleLogout = () => {
-    // TODO: Implement logout logic with Supabase
-    console.log('Logout clicked');
+    logout();
+    navigate('/signin');
   };
 
-  const handleDeleteAccount = () => {
-    // TODO: Implement account deletion logic with Supabase
-    console.log('Delete account clicked');
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      language === 'ko' 
+        ? '정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.' 
+        : 'Are you sure you want to delete your account? This action cannot be undone.'
+    );
+    
+    if (confirmed) {
+      const success = await deleteAccount();
+      if (success) {
+        navigate('/signin');
+      }
+    }
   };
 
   return (
@@ -38,9 +48,9 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ language }) => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" alt={userData.name} />
+            <AvatarImage src="" alt={user.name} />
             <AvatarFallback>
-              <User className="h-4 w-4" />
+              {user.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -48,13 +58,18 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ language }) => {
       <DropdownMenuContent className="w-64" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{userData.name}</p>
+            <p className="text-sm font-medium leading-none">{user.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {userData.email}
+              {user.email}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {userData.phone}
+              {user.phone}
             </p>
+            {user.level === 'admin' && (
+              <p className="text-xs leading-none text-teal-400 font-semibold">
+                {language === 'ko' ? '관리자' : 'Administrator'}
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -62,7 +77,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ language }) => {
           <LogOut className="mr-2 h-4 w-4" />
           <span>{language === 'ko' ? '로그아웃' : 'Logout'}</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDeleteAccount} className="text-red-600">
+        <DropdownMenuItem onClick={handleDeleteAccount} className="text-destructive focus:text-destructive">
           <UserX className="mr-2 h-4 w-4" />
           <span>{language === 'ko' ? '회원탈퇴' : 'Delete Account'}</span>
         </DropdownMenuItem>

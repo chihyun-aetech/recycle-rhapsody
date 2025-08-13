@@ -1,15 +1,17 @@
-import React, { useState, createContext, useContext } from 'react';
+import React, { useState, createContext, useContext, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Navigation } from './Navigation';
 import { OverviewTab } from './tabs/OverviewTab';
 import { IntegratedMonitoringTab } from './tabs/IntegratedMonitoringTab';
 import { StatsTab2 } from './tabs/StatsTab2';
+import { AdminTab } from './tabs/AdminTab';
 import { Sun, Moon, Globe, Settings } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-type Tab = 'overview' | 'monitoring' | 'stats';
+type Tab = 'overview' | 'monitoring' | 'stats' | 'admin';
 type FontSize = 'small' | 'medium' | 'large';
 type Theme = 'light' | 'dark';
 type Language = 'ko' | 'en';
@@ -40,12 +42,19 @@ export const useDashboard = () => {
 };
 
 export const DashboardLayout: React.FC = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [fontSize, setFontSize] = useState<FontSize>('small');
   const [theme, setTheme] = useState<Theme>('light');
   const [language, setLanguage] = useState<Language>('ko');
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [selectedLine, setSelectedLine] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (user?.level === 'admin') {
+      setActiveTab('admin');
+    }
+  }, [user]);
 
   const contextValue: DashboardContextType = {
     activeTab,
@@ -70,7 +79,10 @@ export const DashboardLayout: React.FC = () => {
 
   React.useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--font-size-multiplier', fontSize === 'small' ? '1' : fontSize === 'medium' ? '1.125' : '1.25');
+    // Remove existing font size classes
+    root.classList.remove('font-size-small', 'font-size-medium', 'font-size-large');
+    // Add new font size class
+    root.classList.add(`font-size-${fontSize}`);
   }, [fontSize]);
 
   React.useEffect(() => {
@@ -100,6 +112,7 @@ export const DashboardLayout: React.FC = () => {
           {activeTab === 'overview' && <OverviewTab />}
           {activeTab === 'monitoring' && <IntegratedMonitoringTab />}
           {activeTab === 'stats' && <StatsTab2 />}
+          {activeTab === 'admin' && <AdminTab />}
         </main>
         
         {/* Floating Settings Button - visible when navigation controls are hidden */}

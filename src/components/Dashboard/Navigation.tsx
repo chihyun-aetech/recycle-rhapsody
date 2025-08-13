@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Bell, Sun, Moon, Globe, Type, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -8,33 +8,66 @@ import { useDashboard } from './DashboardLayout';
 import { AlertDropdown } from './AlertDropdown';
 import { UserDropdown } from './UserDropdown';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const Navigation: React.FC = () => {
-  const { 
-    activeTab, 
-    setActiveTab, 
-    fontSize, 
-    setFontSize, 
-    theme, 
-    setTheme, 
-    language, 
-    setLanguage 
-  } = useDashboard();
-
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  // Try to use Dashboard context, fallback to local state if not available
+  let dashboardContext;
+  try {
+    dashboardContext = useDashboard();
+  } catch {
+    dashboardContext = null;
+  }
+
+  // Local state for standalone usage (like in AdminPage)
+  const [localTheme, setLocalTheme] = useState<'light' | 'dark'>('light');
+  const [localLanguage, setLocalLanguage] = useState<'ko' | 'en'>('ko');
+  const [localFontSize, setLocalFontSize] = useState<'small' | 'medium' | 'large'>('small');
+  const [localActiveTab, setLocalActiveTab] = useState<'overview' | 'monitoring' | 'stats' | 'admin'>('overview');
+
+  // Use dashboard context if available, otherwise use local state
+  const activeTab = dashboardContext?.activeTab || localActiveTab;
+  const setActiveTab = dashboardContext?.setActiveTab || setLocalActiveTab;
+  const fontSize = dashboardContext?.fontSize || localFontSize;
+  const setFontSize = dashboardContext?.setFontSize || setLocalFontSize;
+  const theme = dashboardContext?.theme || localTheme;
+  const setTheme = dashboardContext?.setTheme || setLocalTheme;
+  const language = dashboardContext?.language || localLanguage;
+  const setLanguage = dashboardContext?.setLanguage || setLocalLanguage;
+
+  // Apply theme and font size when using local state
+  React.useEffect(() => {
+    if (!dashboardContext) {
+      const root = document.documentElement;
+      if (theme === 'dark') {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+  }, [theme, dashboardContext]);
+
+  React.useEffect(() => {
+    if (!dashboardContext) {
+      const root = document.documentElement;
+      root.classList.remove('font-size-small', 'font-size-medium', 'font-size-large');
+      root.classList.add(`font-size-${fontSize}`);
+    }
+  }, [fontSize, dashboardContext]);
 
   const handleTitleClick = () => {
     navigate('/');
   };
-
-  const isAdmin = localStorage.getItem('isAdmin') === 'true';
   
   const tabs = [
     { key: 'overview' as const, label: language === 'ko' ? '개요' : 'Overview' },
     { key: 'monitoring' as const, label: language === 'ko' ? '모니터링' : 'Monitoring' },
     { key: 'stats' as const, label: language === 'ko' ? '통계' : 'Stats' },
-    ...(isAdmin ? [{ key: 'admin' as const, label: language === 'ko' ? '관리자' : 'Admin' }] : []),
+    ...(user?.level === 'admin' ? [{ key: 'admin' as const, label: language === 'ko' ? '관리자' : 'Admin' }] : []),
   ];
 
   const fontSizes = [
@@ -45,7 +78,7 @@ export const Navigation: React.FC = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card border-b border-border backdrop-blur-sm">
-      <div className="flex items-center justify-between px-4 lg:px-6 py-3">
+      <div className="flex items-center justify-between px-4 lg:px-6 py-3 relative">
         {/* Logo */}
         <div className="flex items-center space-x-2 min-w-0">
           <div className="w-8 h-8 bg-gradient-blue rounded-lg flex items-center justify-center flex-shrink-0">
@@ -60,24 +93,18 @@ export const Navigation: React.FC = () => {
         </div>
 
         {/* Tabs */}
-        <div className="hidden md:flex items-center space-x-1 bg-muted rounded-lg p-1">
+        <div className="hidden md:flex items-center space-x-1 bg-muted rounded-lg p-1 absolute left-1/2 -translate-x-1/2">
           {tabs.map((tab) => (
             <Button
               key={tab.key}
               variant={activeTab === tab.key ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => {
-                if (tab.key === 'admin') {
-                  navigate('/admin');
-                } else {
-                  setActiveTab(tab.key);
-                }
-              }}
+              onClick={() => setActiveTab(tab.key)}
               className={cn(
                 'transition-all duration-200',
-                activeTab === tab.key || (tab.key === 'admin' && location.pathname === '/admin')
-                  ? 'bg-primary text-primary-foreground shadow-sm' 
-                  : 'text-muted-foreground'
+                activeTab === tab.key
+                  ? 'bg-primary text-primary-foreground shadow-sm hover:text-white' 
+                  : 'text-muted-foreground hover:text-primary-foreground'
               )}
             >
               {tab.label}
@@ -98,15 +125,9 @@ export const Navigation: React.FC = () => {
                 {tabs.map((tab) => (
                   <Button
                     key={tab.key}
-                    variant={activeTab === tab.key || (tab.key === 'admin' && location.pathname === '/admin') ? 'default' : 'ghost'}
+                    variant={activeTab === tab.key ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => {
-                      if (tab.key === 'admin') {
-                        navigate('/admin');
-                      } else {
-                        setActiveTab(tab.key);
-                      }
-                    }}
+                    onClick={() => setActiveTab(tab.key)}
                     className="justify-start w-full"
                   >
                     {tab.label}
@@ -119,8 +140,15 @@ export const Navigation: React.FC = () => {
 
         {/* Controls */}
         <div className="flex items-center space-x-1 lg:space-x-2">
-          {/* Alert Dropdown */}
-          <AlertDropdown />
+          {/* Alert Dropdown - only show when dashboard context is available */}
+          {dashboardContext ? (
+            <AlertDropdown />
+          ) : (
+            <Button variant="ghost" size="sm" className="relative">
+              <Bell className="h-4 w-4" />
+              <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+            </Button>
+          )}
           
           {/* User Dropdown */}
           <UserDropdown language={language} />

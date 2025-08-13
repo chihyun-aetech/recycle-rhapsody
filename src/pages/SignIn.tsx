@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const SignUp = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,21 +20,17 @@ const SignUp = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =
     phone: ''
   });
 
-  const handleSubmit = () => {
+  const { register } = useAuth();
+
+  const handleSubmit = async () => {
     if (formData.password !== formData.passwordCheck) {
-      toast({
-        title: "비밀번호 확인",
-        description: "비밀번호가 일치하지 않습니다.",
-        variant: "destructive",
-      });
       return;
     }
     
-    toast({
-      title: "회원가입 완료",
-      description: "성공적으로 가입되었습니다.",
-    });
-    onClose();
+    const success = await register(formData.email, formData.password, formData.name, formData.phone);
+    if (success) {
+      onClose();
+    }
   };
 
   return (
@@ -181,22 +177,18 @@ const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { login, user } = useAuth();
 
-  const handleLogin = () => {
-    if (email === 'admin@aetech.co.kr' && password === 'admin1234') {
-      localStorage.setItem('isAdmin', 'true');
-      localStorage.setItem('userEmail', email);
-      toast({
-        title: "로그인 성공",
-        description: "관리자로 로그인되었습니다.",
-      });
+  useEffect(() => {
+    if (user) {
       navigate('/');
-    } else {
-      toast({
-        title: "로그인 실패",
-        description: "아이디 또는 비밀번호를 확인해주세요.",
-        variant: "destructive",
-      });
+    }
+  }, [user, navigate]);
+
+  const handleLogin = async () => {
+    const success = await login(email, password);
+    if (success) {
+      navigate('/');
     }
   };
 
@@ -210,7 +202,7 @@ const SignIn = () => {
           <div className="space-y-2">
             <Input
               id="email"
-              placeholder="admin@aetech.co.kr"
+              placeholder="이메일을 입력해주세요"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="bg-gray-200 border-gray-300 text-gray-900 placeholder:text-gray-500"
@@ -222,7 +214,7 @@ const SignIn = () => {
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="비밀번호를 입력해주세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-gray-200 border-gray-300 text-gray-900 placeholder:text-gray-500 pr-10"
