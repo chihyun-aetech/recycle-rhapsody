@@ -2,8 +2,8 @@ import React, { useState, createContext, useContext, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Navigation } from './Navigation';
 import { OverviewTab } from './tabs/OverviewTab';
-import { IntegratedMonitoringTab } from './tabs/IntegratedMonitoringTab';
-import { StatsTab2 } from './tabs/StatsTab2';
+import { MonitoringTab } from './tabs/MonitoringTab';
+import { StatsTab } from './tabs/StatsTab';
 import { AdminTab } from './tabs/AdminTab';
 import { Sun, Moon, Globe, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -110,8 +110,8 @@ export const DashboardLayout: React.FC = () => {
         <Navigation />
         <main className="pt-16 dashboard-content">
           {activeTab === 'overview' && <OverviewTab />}
-          {activeTab === 'monitoring' && <IntegratedMonitoringTab />}
-          {activeTab === 'stats' && <StatsTab2 />}
+          {activeTab === 'monitoring' && <MonitoringTab />}
+          {activeTab === 'stats' && <StatsTab />}
           {activeTab === 'admin' && <AdminTab />}
         </main>
         

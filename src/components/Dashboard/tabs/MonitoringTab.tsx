@@ -1,8 +1,8 @@
 import React from 'react';
 import { useDashboard } from '../DashboardLayout';
-import { ConveyorSystem } from '../components/ConveyorSystem';
-import { VisionBox } from '../components/VisionBox';
-import { RealTimeMetrics } from '../components/RealTimeMetrics';
+import { StatusBar } from '../components/StatusBar';
+import { ProcessingLineFlow } from '../components/ProcessingLineFlow';
+import { SystemLogs } from '../components/SystemLogs';
 
 export const MonitoringTab: React.FC = () => {
   const { language } = useDashboard();
@@ -14,18 +14,18 @@ export const MonitoringTab: React.FC = () => {
           {language === 'ko' ? '모니터링' : 'Monitoring'}
         </h1>
         <div className="text-sm text-muted-foreground">
-          {language === 'ko' ? '실시간 장비 모니터링' : 'Real-time Equipment Monitoring'}
+          {language === 'ko' ? '실시간 하드웨어 모니터링' : 'Real-time Hardware Monitoring'}
         </div>
       </div>
 
-      {/* Real-time Metrics */}
-      <RealTimeMetrics />
+      {/* Status Bar */}
+      <StatusBar />
 
-      {/* Conveyor System Visualization */}
-      <ConveyorSystem />
+      {/* Processing Line Flow */}
+      <ProcessingLineFlow />
 
-      {/* Vision Box Details */}
-      <VisionBox />
+      {/* System Logs */}
+      <SystemLogs />
     </div>
   );
 };
