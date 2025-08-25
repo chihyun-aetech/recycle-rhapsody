@@ -212,4 +212,42 @@ All colors MUST be HSL.
   .font-size-large .dashboard-content input {
     font-size: 1.125rem; /* 18px */
   }
+
+  /* Calendar hover fix - target all possible selectors with highest specificity */
+  .rdp-day button:hover,
+  .rdp-day button:focus,
+  .rdp-day:hover button,
+  .rdp-day:focus button,
+  button.rdp-button_reset.rdp-button.rdp-day:hover,
+  button.rdp-button_reset.rdp-button.rdp-day:focus {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+    border-color: hsl(var(--primary)) !important;
+  }
+
+  /* Selected state */
+  .rdp-day_selected button,
+  button.rdp-button_reset.rdp-button.rdp-day.rdp-day_selected {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+    border-color: hsl(var(--primary)) !important;
+  }
+
+  /* Selected hover state */
+  .rdp-day_selected:hover button,
+  .rdp-day_selected button:hover,
+  button.rdp-button_reset.rdp-button.rdp-day.rdp-day_selected:hover {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+    opacity: 0.9 !important;
+    border-color: hsl(var(--primary)) !important;
+  }
+
+  /* Force text color on all calendar elements */
+  .rdp button[aria-label]:hover,
+  .rdp button[aria-label]:focus,
+  .rdp-day:hover *,
+  .rdp-day:focus * {
+    color: hsl(var(--primary-foreground)) !important;
+  }
 }
