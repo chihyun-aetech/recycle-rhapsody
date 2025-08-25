@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDashboard } from '../DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { toast } from 'sonner';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter, AreaChart, Area } from 'recharts';
 import { CalendarIcon, Download } from 'lucide-react';
 import { format } from 'date-fns';
@@ -34,7 +35,7 @@ const generateRealCSVData = () => {
   
   // R1, R2, R3 로봇의 오늘 9시-16시 데이터 시뮬레이션
   const stations = ['R1', 'R2', 'R3'];
-  const majorCategories = ['Pet', 'Pe', 'Pp', 'Ps', 'Glass', 'Can', 'Paper', 'Other'];
+  const majorCategories = ['Pet', 'Paper', 'Pe', 'Glass', 'Pp', 'Can', 'Ps', 'Other'];
   
   stations.forEach(station => {
     // 각 로봇마다 9시부터 16시까지 (7시간) 데이터 생성
@@ -47,7 +48,18 @@ const generateRealCSVData = () => {
         
         for (let item = 0; item < actualRate; item++) {
           const timestamp = `2025-08-14-${hour.toString().padStart(2, '0')}${minute.toString().padStart(2, '0')}${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
-          const majorCategory = majorCategories[Math.floor(Math.random() * majorCategories.length)];
+          
+          // 가중치 기반 카테고리 선택 (Pet이 가장 많고, Other가 가장 적음)
+          const rand = Math.random();
+          let majorCategory;
+          if (rand < 0.32) majorCategory = 'Pet';
+          else if (rand < 0.50) majorCategory = 'Paper';
+          else if (rand < 0.66) majorCategory = 'Pe';
+          else if (rand < 0.78) majorCategory = 'Glass';
+          else if (rand < 0.87) majorCategory = 'Pp';
+          else if (rand < 0.94) majorCategory = 'Can';
+          else if (rand < 0.98) majorCategory = 'Ps';
+          else majorCategory = 'Other';
           
           data.push({
             timestamp,
@@ -60,7 +72,7 @@ const generateRealCSVData = () => {
             width: Math.floor(Math.random() * 200) + 50,
             height: Math.floor(Math.random() * 250) + 50,
             area: Math.floor(Math.random() * 40000) + 10000,
-            depth: (Math.random() * 100 + 10).toFixed(1)
+            depth: (Math.random() * 120).toFixed(1)
           });
         }
       }
@@ -70,39 +82,46 @@ const generateRealCSVData = () => {
   return data;
 };
 
-// CSV 데이터에서 Depth 분포 계산 (히스토그램용)
-const generateDepthDistribution = (csvData: any[]) => {
-  const depths = csvData.map(row => parseFloat(row.depth)).filter(depth => !isNaN(depth));
+// CSV 데이터에서 시간별 Depth 평균 계산
+const generateDepthByTime = (csvData: any[]) => {
+  const timeGroups: { [key: string]: { depths: number[], count: number } } = {};
   
-  // 10mm 단위로 구간 나누기
-  const binSize = 10;
-  const minDepth = Math.min(...depths);
-  const maxDepth = Math.max(...depths);
-  const bins: { [key: string]: number } = {};
-  
-  // 구간별로 개수 계산
-  depths.forEach(depth => {
-    const binKey = Math.floor(depth / binSize) * binSize;
-    const binLabel = `${binKey}-${binKey + binSize}mm`;
-    bins[binLabel] = (bins[binLabel] || 0) + 1;
+  csvData.forEach(row => {
+    if (row.timestamp && row.depth) {
+      // timestamp 형식: 2025-08-14-HHMMSS에서 시간 추출
+      const timestamp = row.timestamp;
+      const hour = timestamp.substring(11, 13); // HH
+      const timeLabel = `${hour}:00`;
+      
+      if (!timeGroups[timeLabel]) {
+        timeGroups[timeLabel] = { depths: [], count: 0 };
+      }
+      
+      timeGroups[timeLabel].depths.push(parseFloat(row.depth));
+      timeGroups[timeLabel].count++;
+    }
   });
   
-  const distributionData = Object.entries(bins).map(([range, count]) => ({
-    range,
-    count,
-    percentage: ((count / depths.length) * 100).toFixed(1)
-  })).sort((a, b) => {
-    const aStart = parseInt(a.range.split('-')[0]);
-    const bStart = parseInt(b.range.split('-')[0]);
-    return aStart - bStart;
-  });
+  // 시간별 평균 depth 계산
+  const timeData = Object.entries(timeGroups).map(([time, data]) => ({
+    time,
+    averageDepth: data.depths.reduce((sum, depth) => sum + depth, 0) / data.depths.length,
+    count: data.count,
+    minDepth: Math.min(...data.depths),
+    maxDepth: Math.max(...data.depths)
+  })).sort((a, b) => a.time.localeCompare(b.time));
+  
+  // 전체 통계
+  const allDepths = csvData.map(row => parseFloat(row.depth)).filter(depth => !isNaN(depth));
   
   return {
-    distributionData,
-    average: depths.reduce((sum, depth) => sum + depth, 0) / depths.length,
-    min: minDepth,
-    max: maxDepth,
-    median: depths.sort((a, b) => a - b)[Math.floor(depths.length / 2)]
+    timeData,
+    overall: {
+      average: allDepths.reduce((sum, depth) => sum + depth, 0) / allDepths.length,
+      min: Math.min(...allDepths),
+      max: Math.max(...allDepths),
+      median: allDepths.sort((a, b) => a - b)[Math.floor(allDepths.length / 2)]
+    }
   };
 };
 
@@ -125,6 +144,33 @@ const generateProcessingByMinute = (csvData: any[]) => {
     fullMinute: minute, // 정렬용
     count
   })).sort((a, b) => a.fullMinute.localeCompare(b.fullMinute));
+};
+
+// 선택된 날짜의 10분 단위 처리량 계산
+const generateProcessingByTenMinutes = (selectedDate: Date) => {
+  const data = [];
+  const dateStr = format(selectedDate, 'yyyy-MM-dd');
+  
+  // 9시부터 16시까지 10분 단위로 데이터 생성
+  for (let hour = 9; hour <= 16; hour++) {
+    for (let minute = 0; minute < 60; minute += 10) {
+      const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      const timestamp = `${dateStr}-${hour.toString().padStart(2, '0')}${minute.toString().padStart(2, '0')}`;
+      
+      // 10분간의 처리량 시뮬레이션 (30-80개 범위)
+      const baseProcessing = 50;
+      const variance = Math.random() * 30 - 15; // ±15 변동
+      const count = Math.max(5, Math.round(baseProcessing + variance));
+      
+      data.push({
+        time: timeStr,
+        timestamp,
+        count
+      });
+    }
+  }
+  
+  return data;
 };
 
 // CSV 데이터에서 카테고리 분포 계산
@@ -157,11 +203,17 @@ const generateAreaStats = (csvData: any[]) => {
   const maxArea = Math.max(...areas);
   const bins: { [key: string]: number } = {};
   
-  // 구간별로 개수 계산
-  areas.forEach(area => {
+  // 구간별로 개수 계산 (정규분포 비슷한 패턴으로 조정)
+  areas.forEach((area, index) => {
     const binKey = Math.floor(area / binSize) * binSize;
     const binLabel = `${binKey.toLocaleString()}-${(binKey + binSize).toLocaleString()}`;
-    bins[binLabel] = (bins[binLabel] || 0) + 1;
+    
+    // 중간 구간에 더 많은 가중치 적용하여 분포 차이 생성
+    const midRange = 30000; // 30K 픽셀 근처에 집중
+    const distanceFromMid = Math.abs(area - midRange);
+    const weight = Math.max(0.2, 1 - (distanceFromMid / 20000)); // 중심에서 멀어질수록 가중치 감소
+    
+    bins[binLabel] = (bins[binLabel] || 0) + Math.ceil(weight * 1.5);
   });
   
   const distributionData = Object.entries(bins).map(([range, count]) => ({
@@ -181,7 +233,7 @@ const generateAreaStats = (csvData: any[]) => {
 // 가상 CSV 데이터 생성 (실제 CSV 구조와 동일)
 const generateMockCSVData = () => {
   const data = [];
-  const majorCategories = ['Pet', 'Pe', 'Pp', 'Ps', 'Glass', 'Can', 'Paper'];
+  const majorCategories = ['Pet', 'Paper', 'Pe', 'Glass', 'Pp', 'Can', 'Ps'];
   const subCategories = {
     Pet: ['PET_Bottle_Colorless_NoLabel', 'PET_G', 'PET_Tray', 'PET_Bottle_Discolored', 'PET_Food', 'PET_Bottle_White_Ricewine'],
     Pe: ['PE_Medicine', 'PE_Sauce', 'PE_Else'],
@@ -199,7 +251,17 @@ const generateMockCSVData = () => {
     const timestampStr = timestamp.toISOString().replace(/[-T:]/g, '').substring(0, 13);
     
     if (Math.random() > 0.3) { // 70% 확률로 데이터 생성
-      const majorCategory = majorCategories[Math.floor(Math.random() * majorCategories.length)];
+      // 가중치 기반 카테고리 선택
+      const rand = Math.random();
+      let majorCategory;
+      if (rand < 0.32) majorCategory = 'Pet';
+      else if (rand < 0.50) majorCategory = 'Paper';
+      else if (rand < 0.66) majorCategory = 'Pe';
+      else if (rand < 0.78) majorCategory = 'Glass';
+      else if (rand < 0.87) majorCategory = 'Pp';
+      else if (rand < 0.94) majorCategory = 'Can';
+      else majorCategory = 'Ps';
+      
       const subCategory = subCategories[majorCategory][Math.floor(Math.random() * subCategories[majorCategory].length)];
       
       data.push({
@@ -213,7 +275,7 @@ const generateMockCSVData = () => {
         width: Math.floor(Math.random() * 200) + 50,
         height: Math.floor(Math.random() * 250) + 50,
         area: Math.floor(Math.random() * 40000) + 10000,
-        depth: (Math.random() * 100 + 10).toFixed(1)
+        depth: (Math.random() * 120).toFixed(1)
       });
     }
   }
@@ -236,14 +298,14 @@ const generatePeriodData = (startDate: Date, endDate: Date) => {
 
   // 실제 CSV 데이터 패턴을 기반으로 한 카테고리별 비율
   const categoryRatios = {
-    Pet: 0.25,    // PET 관련 항목들
-    Pe: 0.18,     // PE 관련 항목들
-    Pp: 0.15,     // PP 관련 항목들
-    Ps: 0.12,     // PS 관련 항목들
-    Glass: 0.10,  // Glass 관련 항목들
-    Can: 0.08,    // Can 관련 항목들
-    Paper: 0.06,  // Paper 관련 항목들
-    Other: 0.06   // Other, Else 관련 항목들
+    Pet: 0.32,    // PET 관련 항목들 (가장 많음)
+    Paper: 0.18,  // Paper 관련 항목들 (두 번째)
+    Pe: 0.16,     // PE 관련 항목들
+    Glass: 0.12,  // Glass 관련 항목들
+    Pp: 0.09,     // PP 관련 항목들
+    Can: 0.07,    // Can 관련 항목들
+    Ps: 0.04,     // PS 관련 항목들
+    Other: 0.02   // Other, Else 관련 항목들 (가장 적음)
   };
 
   // 시간대별 처리량 패턴 (오전 9시~오후 4시, 7시간 운영)
@@ -337,15 +399,35 @@ export const StatsTab: React.FC = () => {
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [isStartCalendarOpen, setIsStartCalendarOpen] = useState(false);
   const [isEndCalendarOpen, setIsEndCalendarOpen] = useState(false);
-
-  const periodData = generatePeriodData(startDate, endDate);
   
-  // 실제 CSV 데이터 분석
-  const realCSVData = generateRealCSVData();
-  const depthStats = generateDepthDistribution(realCSVData);
-  const processingByMinute = generateProcessingByMinute(realCSVData);
-  const categoryDistribution = generateCategoryDistribution(realCSVData);
-  const areaStats = generateAreaStats(realCSVData);
+  // 분단위 차트용 날짜 선택
+  const [selectedMinuteDate, setSelectedMinuteDate] = useState<Date>(new Date());
+  const [isMinuteDateCalendarOpen, setIsMinuteDateCalendarOpen] = useState(false);
+
+  // 기간이 변경될 때 선택된 날짜 조정
+  useEffect(() => {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    
+    // 오늘이 설정된 기간 내에 있으면 오늘로, 아니면 endDate로 설정
+    if (today >= startDate && today <= endDate) {
+      setSelectedMinuteDate(today);
+    } else {
+      setSelectedMinuteDate(endDate);
+    }
+  }, [startDate, endDate]);
+
+  const periodData = useMemo(() => generatePeriodData(startDate, endDate), [startDate, endDate]);
+  
+  // 실제 CSV 데이터 분석 (기간과 무관하므로 한 번만 계산)
+  const realCSVData = useMemo(() => generateRealCSVData(), []);
+  const depthByTime = useMemo(() => generateDepthByTime(realCSVData), [realCSVData]);
+  const processingByMinute = useMemo(() => generateProcessingByMinute(realCSVData), [realCSVData]);
+  const categoryDistribution = useMemo(() => generateCategoryDistribution(realCSVData), [realCSVData]);
+  const areaStats = useMemo(() => generateAreaStats(realCSVData), [realCSVData]);
+  
+  // 선택된 날짜의 10분 단위 처리량 데이터 (선택된 날짜가 변경될 때만 재계산)
+  const processingByTenMinutes = useMemo(() => generateProcessingByTenMinutes(selectedMinuteDate), [selectedMinuteDate]);
   
   // 차트 색상
   const COLORS = ['#00A788', '#3b82f6', '#22c55e', '#9333ea', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -401,7 +483,7 @@ export const StatsTab: React.FC = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">
-          {language === 'ko' ? '통계 (Design 2)' : 'Statistics (Design 2)'}
+          {language === 'ko' ? '통계' : 'Statistics'}
         </h1>
         <div className="text-right">
           <div className="text-lg font-semibold text-foreground">
@@ -438,6 +520,19 @@ export const StatsTab: React.FC = () => {
                       selected={startDate}
                       onSelect={(date) => {
                         if (date) {
+                          const today = new Date();
+                          today.setHours(23, 59, 59, 999);
+                          
+                          if (date > today) {
+                            toast.error(language === 'ko' ? '시작일은 오늘 이후로 설정할 수 없습니다.' : 'Start date cannot be set after today.');
+                            return;
+                          }
+                          
+                          if (date > endDate) {
+                            toast.error(language === 'ko' ? '시작일은 종료일보다 늦을 수 없습니다.' : 'Start date cannot be after end date.');
+                            return;
+                          }
+                          
                           setStartDate(date);
                           setIsStartCalendarOpen(false);
                         }
@@ -466,6 +561,19 @@ export const StatsTab: React.FC = () => {
                       selected={endDate}
                       onSelect={(date) => {
                         if (date) {
+                          const today = new Date();
+                          today.setHours(23, 59, 59, 999);
+                          
+                          if (date > today) {
+                            toast.error(language === 'ko' ? '종료일은 오늘 이후로 설정할 수 없습니다.' : 'End date cannot be set after today.');
+                            return;
+                          }
+                          
+                          if (date < startDate) {
+                            toast.error(language === 'ko' ? '종료일은 시작일보다 앞설 수 없습니다.' : 'End date cannot be before start date.');
+                            return;
+                          }
+                          
                           setEndDate(date);
                           setIsEndCalendarOpen(false);
                         }
@@ -751,21 +859,21 @@ export const StatsTab: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>{language === 'ko' ? 'Depth 분포 히스토그램' : 'Depth Distribution Histogram'}</CardTitle>
+            <CardTitle>{language === 'ko' ? '시간별 Depth 평균 변화' : 'Hourly Average Depth Trend'}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 grid grid-cols-2 lg:grid-cols-4 gap-2 text-center">
               <div>
                 <div className="text-lg font-bold text-foreground">
-                  {depthStats.average.toFixed(1)}mm
+                  {depthByTime.overall.average.toFixed(1)}mm
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {language === 'ko' ? '평균' : 'Avg'}
+                  {language === 'ko' ? '전체 평균' : 'Overall Avg'}
                 </p>
               </div>
               <div>
                 <div className="text-lg font-bold text-foreground">
-                  {depthStats.min.toFixed(1)}mm
+                  {depthByTime.overall.min.toFixed(1)}mm
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {language === 'ko' ? '최소' : 'Min'}
@@ -773,7 +881,7 @@ export const StatsTab: React.FC = () => {
               </div>
               <div>
                 <div className="text-lg font-bold text-foreground">
-                  {depthStats.max.toFixed(1)}mm
+                  {depthByTime.overall.max.toFixed(1)}mm
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {language === 'ko' ? '최대' : 'Max'}
@@ -781,42 +889,45 @@ export const StatsTab: React.FC = () => {
               </div>
               <div>
                 <div className="text-lg font-bold text-foreground">
-                  {depthStats.median.toFixed(1)}mm
+                  {depthByTime.overall.median.toFixed(1)}mm
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {language === 'ko' ? '중앙' : 'Med'}
+                  {language === 'ko' ? '중앙값' : 'Median'}
                 </p>
               </div>
             </div>
             <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={depthStats.distributionData}>
+              <LineChart data={depthByTime.timeData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
-                  dataKey="range" 
+                  dataKey="time" 
                   className="fill-muted-foreground" 
-                  tick={{ fontSize: 10 }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
+                  tick={{ fontSize: 12 }}
                 />
-                <YAxis className="fill-muted-foreground" tick={{ fontSize: 12 }} />
+                <YAxis 
+                  className="fill-muted-foreground" 
+                  tick={{ fontSize: 12 }}
+                  domain={[0, 120]}
+                  label={{ value: language === 'ko' ? 'Depth (mm)' : 'Depth (mm)', angle: -90, position: 'insideLeft' }}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px'
                   }}
-                  formatter={(value: number) => [value, language === 'ko' ? '개수' : 'Count']}
+                  formatter={(value: number) => [`${value.toFixed(1)}mm`, language === 'ko' ? '평균 깊이' : 'Avg Depth']}
+                  labelFormatter={(label) => `${language === 'ko' ? '시간' : 'Time'}: ${label}`}
                 />
-                <Area
+                <Line
                   type="monotone"
-                  dataKey="count"
+                  dataKey="averageDepth"
                   stroke="#f59e0b"
-                  fill="#f59e0b"
-                  fillOpacity={0.6}
-                  name={language === 'ko' ? '개수' : 'Count'}
+                  strokeWidth={3}
+                  dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
+                  name={language === 'ko' ? '평균 깊이' : 'Average Depth'}
                 />
-              </AreaChart>
+              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
@@ -893,22 +1004,67 @@ export const StatsTab: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>{language === 'ko' ? '분단위 처리량 트렌드' : 'Processing Trend by Minute'}</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>{language === 'ko' ? '10분단위 처리량 트렌드' : '10-Minute Processing Trend'}</CardTitle>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {language === 'ko' ? '날짜:' : 'Date:'}
+                </span>
+                <Popover open={isMinuteDateCalendarOpen} onOpenChange={setIsMinuteDateCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="w-32 justify-start">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(selectedMinuteDate, 'MM-dd')}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      mode="single"
+                      selected={selectedMinuteDate}
+                      onSelect={(date) => {
+                        if (date) {
+                          const today = new Date();
+                          today.setHours(23, 59, 59, 999);
+                          
+                          if (date > today) {
+                            toast.error(language === 'ko' ? '오늘 이후 날짜는 선택할 수 없습니다.' : 'Cannot select future dates.');
+                            return;
+                          }
+                          
+                          if (date < startDate || date > endDate) {
+                            toast.error(language === 'ko' ? '설정된 기간 내의 날짜를 선택해주세요.' : 'Please select a date within the set period.');
+                            return;
+                          }
+                          
+                          setSelectedMinuteDate(date);
+                          setIsMinuteDateCalendarOpen(false);
+                        }
+                      }}
+                      locale={language === 'ko' ? ko : undefined}
+                      className="pointer-events-auto"
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(23, 59, 59, 999);
+                        return date > today || date < startDate || date > endDate;
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={processingByMinute} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <AreaChart data={processingByTenMinutes} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
-                  dataKey="minute" 
+                  dataKey="time" 
                   className="fill-muted-foreground" 
                   tick={{ fontSize: 10 }}
-                  interval="preserveStartEnd"
-                  tickFormatter={(value) => {
-                    // 매 30분마다만 표시
-                    const index = processingByMinute.findIndex(item => item.minute === value);
-                    return index % 30 === 0 ? value : '';
-                  }}
+                  interval={0}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
                 />
                 <YAxis 
                   className="fill-muted-foreground" 
