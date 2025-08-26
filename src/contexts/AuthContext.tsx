@@ -93,6 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         toast({
           title: "로그인 성공",
           description: data.user.level === 'admin' ? "관리자로 로그인되었습니다." : "로그인되었습니다.",
+          duration: 3000,
         });
         
         return true;
@@ -101,6 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           title: "로그인 실패",
           description: data.error || "로그인에 실패했습니다.",
           variant: "destructive",
+          duration: 3000,
         });
         return false;
       }
@@ -109,6 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         title: "로그인 오류",
         description: "네트워크 오류가 발생했습니다.",
         variant: "destructive",
+        duration: 3000,
       });
       return false;
     }
@@ -130,6 +133,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         toast({
           title: "회원가입 완료",
           description: "성공적으로 가입되었습니다.",
+          duration: 3000,
         });
         return true;
       } else {
@@ -137,6 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           title: "회원가입 실패",
           description: data.error || "회원가입에 실패했습니다.",
           variant: "destructive",
+          duration: 3000,
         });
         return false;
       }
@@ -145,6 +150,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         title: "회원가입 오류",
         description: "네트워크 오류가 발생했습니다.",
         variant: "destructive",
+        duration: 3000,
       });
       return false;
     }

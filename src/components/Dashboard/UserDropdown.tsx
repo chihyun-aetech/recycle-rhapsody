@@ -46,10 +46,10 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ language }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full group">
           <Avatar className="h-8 w-8">
             <AvatarImage src="" alt={user.name} />
-            <AvatarFallback>
+            <AvatarFallback className='group-hover:font-bold group-hover:text-black dark:group-hover:text-white'>
               {user.name.charAt(0)}
             </AvatarFallback>
           </Avatar>

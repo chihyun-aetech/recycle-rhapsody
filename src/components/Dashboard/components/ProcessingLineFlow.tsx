@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Camera, Package, Cpu, Zap } from 'lucide-react';
 import { useDashboard } from '../DashboardLayout';
 import { cn } from '@/lib/utils';
+import { createPortal } from 'react-dom';
 import {
   ReactFlow,
   Controls,
@@ -108,11 +109,56 @@ const equipmentList: Equipment[] = [
 // Custom node component with hover tooltip for processing stats
 const CustomNode = ({ data, id }: { data: any, id: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const processingStats = data.processingStats;
   const language = data.language || 'en';
+  const nodeRef = React.useRef<HTMLDivElement>(null);
+
+  const updateTooltipPosition = () => {
+    if (nodeRef.current) {
+      const rect = nodeRef.current.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      
+      // 기본 위치 계산
+      let x = rect.right + 10;
+      let y = rect.top - 8;
+      
+      // 툴팁이 오른쪽 화면을 벗어나는 경우
+      if (x + 300 > windowWidth) { // 300px는 툴팁의 대략적인 너비
+        x = rect.left - 310; // 왼쪽에 표시
+      }
+      
+      // 툴팁이 아래쪽 화면을 벗어나는 경우
+      if (y + 400 > windowHeight) { // 400px는 툴팁의 대략적인 최대 높이
+        y = windowHeight - 410; // 위쪽으로 조정
+      }
+      
+      // 툴팁이 위쪽 화면을 벗어나는 경우
+      if (y < 10) {
+        y = 10; // 최소 상단 여백
+      }
+      
+      setTooltipPosition({ x, y });
+    }
+  };
+
+  useEffect(() => {
+    if (showTooltip) {
+      updateTooltipPosition();
+      // 스크롤이나 리사이즈 시 위치 업데이트
+      window.addEventListener('scroll', updateTooltipPosition);
+      window.addEventListener('resize', updateTooltipPosition);
+      return () => {
+        window.removeEventListener('scroll', updateTooltipPosition);
+        window.removeEventListener('resize', updateTooltipPosition);
+      };
+    }
+  }, [showTooltip]);
 
   return (
     <div 
+      ref={nodeRef}
       className="relative"
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
@@ -152,9 +198,20 @@ const CustomNode = ({ data, id }: { data: any, id: string }) => {
         )}
       </div>
 
-      {/* Hover Tooltip */}
-      {showTooltip && processingStats && (
-        <div className="absolute z-[9999] p-3 bg-popover border border-border rounded-lg shadow-xl text-sm min-w-64 -top-2 left-full ml-2 max-h-96 overflow-y-auto">
+      {/* Hover Tooltip - Portal */}
+      {showTooltip && processingStats && createPortal(
+        <div 
+          className="fixed p-3 bg-popover/95 backdrop-blur-sm border border-border rounded-lg shadow-xl text-sm min-w-64 max-h-96 overflow-y-auto"
+          style={{
+            left: tooltipPosition.x,
+            top: tooltipPosition.y,
+            zIndex: 99999,
+            pointerEvents: 'auto',
+            transform: 'translateZ(0)'
+          }}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
           <div className="font-semibold mb-2">
             {language === 'ko' ? `${processingStats.stationId} 처리 현황` : `${processingStats.stationId} Processing Status`}
           </div>
@@ -185,7 +242,7 @@ const CustomNode = ({ data, id }: { data: any, id: string }) => {
               <div className="font-medium mb-2">{language === 'ko' ? '카테고리별 처리량 (시간당):' : 'Category Distribution (Hourly):'}</div>
               <div className="grid grid-cols-1 gap-1">
                 {Object.entries(processingStats.categoryDistribution)
-                  .sort(([,a], [,b]) => (b as number) - (a as number)) // 처리량 순으로 정렬
+                  .sort(([,a], [,b]) => (b as number) - (a as number))
                   .map(([category, count]) => (
                     <div key={category} className="flex justify-between">
                       <span className="text-muted-foreground">{category}:</span>
@@ -201,7 +258,8 @@ const CustomNode = ({ data, id }: { data: any, id: string }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.getElementById('portal-root') as HTMLElement
       )}
     </div>
   );
@@ -409,9 +467,9 @@ export const ProcessingLineFlow: React.FC = () => {
               onConnect={onConnect}
               nodeTypes={nodeTypes}
               edgesReconnectable={true}
-              reconnectRadius={20}
+              reconnectRadius={5}
               fitView
-              attributionPosition="top-right"
+              attributionPosition="bottom-right"
               style={{ 
                 backgroundColor: 'transparent'
               }}

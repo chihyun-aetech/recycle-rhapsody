@@ -226,20 +226,21 @@ export const StatusBar: React.FC = () => {
     <>
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             {/* Production PCs */}
             {hardwareData.computers.map((computer) => (
               <Button
                 key={computer.id}
                 variant="ghost"
-                className="flex items-center space-x-2 h-auto p-2"
+                className="group flex items-center space-x-2 h-auto p-2"
                 onClick={() => setSelectedDetail(computer.id)}
               >
                 <Cpu className="w-4 h-4" />
                 <div className="text-left">
                   <div className="text-xs font-medium">{computer.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    CPU: {computer.cpu.usage}% GPU: {computer.gpu.usage}%
+                    <span className="group-hover:font-bold group-hover:text-black dark:group-hover:text-white">CPU: {computer.cpu.usage}%</span>{" "}
+                    <span className="group-hover:font-bold group-hover:text-black dark:group-hover:text-white">GPU: {computer.gpu.usage}%</span>
                   </div>
                 </div>
               </Button>
@@ -283,7 +284,7 @@ export const StatusBar: React.FC = () => {
             {/* Vision Box */}
             <Button
               variant="ghost"
-              className="flex items-center space-x-2 h-auto p-2"
+              className="group flex items-center space-x-2 h-auto p-2"
               onClick={() => setSelectedDetail('vision-box')}
             >
               <Camera className="w-4 h-4" />
@@ -291,7 +292,7 @@ export const StatusBar: React.FC = () => {
                 <div className="text-xs font-medium">
                   {language === 'ko' ? '비전 박스' : 'Vision Box'}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-muted-foreground group-hover:font-bold group-hover:text-black dark:group-hover:text-white">
                   {language === 'ko' ? '상세 보기' : 'View Details'}
                 </div>
               </div>

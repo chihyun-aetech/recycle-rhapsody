@@ -32,8 +32,8 @@ export const WasteDistribution: React.FC = () => {
                 data={wasteData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={100}
+                innerRadius={50}
+                outerRadius={90}
                 paddingAngle={2}
                 dataKey="value"
               >
@@ -51,7 +51,8 @@ export const WasteDistribution: React.FC = () => {
               />
               <Legend 
                 verticalAlign="bottom" 
-                height={36}
+                height={30}
+                className='mt-2'
                 formatter={(value) => <span className="text-sm">{value}</span>}
               />
             </PieChart>
