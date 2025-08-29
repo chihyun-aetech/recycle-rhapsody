@@ -30,7 +30,7 @@ interface Equipment {
   icon: React.ReactNode;
   status: 'online' | 'warning' | 'offline';
   type: 'input' | 'camera' | 'atron' | 'output';
-  stationId?: string; // R1, R2, R3 매핑용
+  stationId?: string; // R&T1, SUNGNAM2 등 매핑용
 }
 
 interface ProcessingStats {
@@ -44,64 +44,14 @@ interface ProcessingStats {
   lastProcessedTime: string;
 }
 
-// 실제 CSV 데이터를 시뮬레이션하는 함수 (장비별 처리량 분석용)
-const generateEquipmentProcessingData = (): { [key: string]: ProcessingStats } => {
-  const now = new Date();
-  const currentHour = now.getHours();
-  
-  // R1, R2, R3의 처리 성능 차이 반영
-  const baseRates = {
-    'R1': 65, // 분당 65개
-    'R2': 58, // 분당 58개
-    'R3': 53  // 분당 53개
-  };
-  
-  // 실제 CSV 데이터에서 관찰되는 모든 major_category 반영
-  const categories = ['Pet', 'Pe', 'Pp', 'Ps', 'Glass', 'Can', 'Paper', 'Other', 'PP', 'Else'];
-  
-  const result: { [key: string]: ProcessingStats } = {};
-  
-  ['R1', 'R2', 'R3'].forEach(stationId => {
-    const baseRate = baseRates[stationId as keyof typeof baseRates];
-    const variance = 0.1 + Math.random() * 0.2; // ±15% 변동
-    const currentRate = Math.round(baseRate * (1 + (Math.random() - 0.5) * variance));
-    const hourlyTotal = Math.round(baseRate * 60 * (0.8 + Math.random() * 0.4)); // 시간당 처리량
-    
-    // 카테고리별 분포 생성
-    const categoryDist: { [key: string]: number } = {};
-    let remaining = hourlyTotal;
-    categories.forEach((cat, index) => {
-      if (index === categories.length - 1) {
-        categoryDist[cat] = remaining;
-      } else {
-        const portion = Math.round(remaining * (0.1 + Math.random() * 0.3));
-        categoryDist[cat] = portion;
-        remaining -= portion;
-      }
-    });
-    
-    result[stationId] = {
-      stationId,
-      totalProcessed: Math.round(baseRate * 60 * 7), // 일일 총 처리량 (7시간 기준)
-      processingRate: currentRate,
-      currentHourProcessed: hourlyTotal,
-      averageArea: Math.round(25000 + Math.random() * 20000), // 25000-45000 픽셀
-      averageDepth: Math.round(50 + Math.random() * 50), // 50-100mm
-      categoryDistribution: categoryDist,
-      lastProcessedTime: new Date(now.getTime() - Math.random() * 30000).toISOString() // 최근 30초 내
-    };
-  });
-  
-  return result;
-};
 
 const equipmentList: Equipment[] = [
-  { id: 'vision-box-1', name: 'Vision Box #1 (R1)', nameKo: 'Vision Box #1 (R1)', icon: <Camera className="w-4 h-4" />, status: 'online', type: 'camera', stationId: 'R1' },
-  { id: 'vision-box-2', name: 'Vision Box #2 (R2)', nameKo: 'Vision Box #2 (R2)', icon: <Camera className="w-4 h-4" />, status: 'warning', type: 'camera', stationId: 'R2' },
-  { id: 'vision-box-3', name: 'Vision Box #3 (R3)', nameKo: 'Vision Box #3 (R3)', icon: <Camera className="w-4 h-4" />, status: 'offline', type: 'camera', stationId: 'R3' },
-  { id: 'atron-1', name: 'Atron H/W #1 (R1)', nameKo: 'Atron H/W #1 (R1)', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron', stationId: 'R1' },
-  { id: 'atron-2', name: 'Atron H/W #2 (R2)', nameKo: 'Atron H/W #2 (R2)', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron', stationId: 'R2' },
-  { id: 'atron-3', name: 'Atron H/W #3 (R3)', nameKo: 'Atron H/W #3 (R3)', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron', stationId: 'R3' },
+  { id: 'vision-box-1', name: 'Vision Box #1', nameKo: 'Vision Box #1', icon: <Camera className="w-4 h-4" />, status: 'online', type: 'camera' },
+  { id: 'vision-box-2', name: 'Vision Box #2', nameKo: 'Vision Box #2', icon: <Camera className="w-4 h-4" />, status: 'warning', type: 'camera' },
+  { id: 'vision-box-3', name: 'Vision Box #3', nameKo: 'Vision Box #3', icon: <Camera className="w-4 h-4" />, status: 'offline', type: 'camera' },
+  { id: 'atron-1', name: 'Atron H/W #1', nameKo: 'Atron H/W #1', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron' },
+  { id: 'atron-2', name: 'Atron H/W #2', nameKo: 'Atron H/W #2', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron' },
+  { id: 'atron-3', name: 'Atron H/W #3', nameKo: 'Atron H/W #3', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron' },
   { id: 'input-1', name: 'Input', nameKo: 'Input', icon: <Package className="w-4 h-4" />, status: 'online', type: 'input' },
   { id: 'output-1', name: 'Output', nameKo: 'Output', icon: <Zap className="w-4 h-4" />, status: 'online', type: 'output' },
 ];
@@ -192,7 +142,10 @@ const CustomNode = ({ data, id }: { data: any, id: string }) => {
         
         {/* Processing rate indicator */}
         {processingStats && (
-          <div className="text-xs text-muted-foreground mt-1">
+          <div className={cn(
+            "text-xs mt-1",
+            data.isServerData ? "text-muted-foreground" : "text-muted-foreground bg-muted/30 px-1 rounded"
+          )}>
             {language === 'ko' ? `분당 ${processingStats.processingRate}개` : `${processingStats.processingRate}/min`}
           </div>
         )}
@@ -285,37 +238,236 @@ const getStatusText = (status: string, language: string): string => {
   }
 };
 
-export const ProcessingLineFlow: React.FC = () => {
+interface ProcessingLineFlowProps {
+  objectLogsData?: any;
+  operationStateData?: any;
+  alertsData?: any;
+  machineHealthData?: any;
+  hasRealData: {
+    objectLogs: boolean;
+    operationState: boolean;
+    alerts: boolean;
+    machineHealth: boolean;
+    [key: string]: boolean;
+  };
+  selectedSite: string;
+}
+
+export const ProcessingLineFlow: React.FC<ProcessingLineFlowProps> = ({ 
+  objectLogsData, 
+  operationStateData,
+  alertsData,
+  machineHealthData,
+  hasRealData,
+  selectedSite
+}) => {
   const { language } = useDashboard();
   
-  // Set initial equipment: Input => Vision Box #1 => Atron H/W #1 => Output
-  const initialEquipment = [
-    equipmentList.find(eq => eq.id === 'input-1')!,
-    equipmentList.find(eq => eq.id === 'vision-box-1')!,
-    equipmentList.find(eq => eq.id === 'atron-1')!,
-    equipmentList.find(eq => eq.id === 'atron-2')!,
-    equipmentList.find(eq => eq.id === 'atron-3')!,
-    equipmentList.find(eq => eq.id === 'output-1')!,
-  ];
+  // Helper function to extract H/W index from station_id
+  const extractHwIndexFromStationId = (stationId: string): number => {
+    // Extract last digit(s): "R&T1" -> 1, "SUNGNAM12" -> 12
+    const match = stationId.match(/\d+$/);
+    return match ? parseInt(match[0]) : 1;
+  };
   
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment[]>(initialEquipment);
+  // Helper function to determine equipment status from server data
+  const getEquipmentStatus = (stationId: string): 'online' | 'warning' | 'offline' => {
+    // Check alerts first for critical/warning states
+    if (hasRealData.alerts && alertsData?.results?.length > 0) {
+      const stationAlerts = alertsData.results.filter(alert => alert.station_id === stationId);
+      if (stationAlerts.length > 0) {
+        const criticalAlerts = stationAlerts.filter(alert => alert.severity === 'critical');
+        const warningAlerts = stationAlerts.filter(alert => alert.severity === 'warning');
+        
+        if (criticalAlerts.length > 0) return 'offline';
+        if (warningAlerts.length > 0) return 'warning';
+      }
+    }
+    
+    // Check operation state for online/offline
+    if (hasRealData.operationState && operationStateData?.results?.length > 0) {
+      const stationOperation = operationStateData.results.find(op => op.station_id === stationId);
+      if (stationOperation) {
+        return stationOperation.state ? 'online' : 'offline';
+      }
+    }
+    
+    // Check machine health as fallback
+    if (hasRealData.machineHealth && machineHealthData?.results?.length > 0) {
+      const stationMachine = machineHealthData.results.find(machine => machine.station_id === stationId);
+      if (stationMachine) {
+        // Check for high temperatures or other issues
+        const cpuTemp = stationMachine.cpu_temperature || 0;
+        const gpuTemp = stationMachine.gpu_temperature || 0;
+        
+        if (cpuTemp > 80 || gpuTemp > 85) return 'offline';
+        if (cpuTemp > 70 || gpuTemp > 75) return 'warning';
+        return 'online';
+      }
+    }
+    
+    return 'online'; // Default to online if no data
+  };
+  
+  // Generate dynamic equipment list based on available station_ids from server data
+  const generateEquipmentFromStations = (): Equipment[] => {
+    const equipment: Equipment[] = [];
+    const allStationIds = new Set<string>();
+    
+    // Collect all station_ids from all server data sources
+    if (hasRealData.operationState && operationStateData?.results?.length > 0) {
+      operationStateData.results.forEach(op => allStationIds.add(op.station_id));
+    }
+    if (hasRealData.alerts && alertsData?.results?.length > 0) {
+      alertsData.results.forEach(alert => allStationIds.add(alert.station_id));
+    }
+    if (hasRealData.machineHealth && machineHealthData?.results?.length > 0) {
+      machineHealthData.results.forEach(machine => allStationIds.add(machine.station_id));
+    }
+    if (hasRealData.objectLogs && objectLogsData?.results?.length > 0) {
+      objectLogsData.results.forEach(log => allStationIds.add(log.station_id));
+    }
+    
+    // Always add Input and Output
+    equipment.push(equipmentList.find(eq => eq.id === 'input-1')!);
+    
+    // Add equipment based on available station_ids from server data
+    if (allStationIds.size > 0) {
+      const stationIds = Array.from(allStationIds).sort();
+      
+      stationIds.forEach(stationId => {
+        const hwIndex = extractHwIndexFromStationId(stationId);
+        const visionBox = equipmentList.find(eq => eq.id === `vision-box-${hwIndex}`);
+        const atron = equipmentList.find(eq => eq.id === `atron-${hwIndex}`);
+        
+        if (visionBox && !equipment.find(eq => eq.id === visionBox.id)) {
+          const status = getEquipmentStatus(stationId);
+          equipment.push({ ...visionBox, stationId, status });
+        }
+        if (atron && !equipment.find(eq => eq.id === atron.id)) {
+          const status = getEquipmentStatus(stationId);
+          equipment.push({ ...atron, stationId, status });
+        }
+      });
+    } else {
+      // Fallback equipment for selected site
+      [1, 2, 3].forEach(index => {
+        const stationId = `${selectedSite}${index}`; // "R&T1", "SUNGNAM2" format
+        const visionBox = equipmentList.find(eq => eq.id === `vision-box-${index}`);
+        const atron = equipmentList.find(eq => eq.id === `atron-${index}`);
+        
+        if (visionBox) equipment.push({ ...visionBox, stationId });
+        if (atron) equipment.push({ ...atron, stationId });
+      });
+    }
+    
+    equipment.push(equipmentList.find(eq => eq.id === 'output-1')!);
+    
+    return equipment;
+  };
+  
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment[]>([]);
   const [selectedLine, setSelectedLine] = useState<string>('Line1');
   const [processingData, setProcessingData] = useState<{ [key: string]: ProcessingStats }>({});
+  
+  // Update equipment when site changes or data loads
+  React.useEffect(() => {
+    const newEquipment = generateEquipmentFromStations();
+    setSelectedEquipment(newEquipment);
+  }, [selectedSite, operationStateData, alertsData, machineHealthData, objectLogsData, hasRealData]);
 
-  // 실시간 처리량 데이터 업데이트
+  // Generate fallback processing statistics
+  const generateFallbackProcessingData = (): { [key: string]: ProcessingStats } => {
+    const now = new Date();
+    const baseRates = [65, 58, 53]; // 분당 처리량 기본값
+    
+    const categories = ['Pet', 'Pe', 'Pp', 'Ps', 'Glass', 'Can', 'Paper', 'Other', 'PP', 'Else'];
+    const result: { [key: string]: ProcessingStats } = {};
+    
+    // Generate data for 3 H/W units for the selected site
+    [1, 2, 3].forEach(hwIndex => {
+      const stationId = `${selectedSite}${hwIndex}`; // "R&T1", "SUNGNAM2" format
+      const baseRate = baseRates[hwIndex - 1];
+      const variance = 0.1 + Math.random() * 0.2;
+      const currentRate = Math.round(baseRate * (1 + (Math.random() - 0.5) * variance));
+      const hourlyTotal = Math.round(baseRate * 60 * (0.8 + Math.random() * 0.4));
+      
+      const categoryDist: { [key: string]: number } = {};
+      let remaining = hourlyTotal;
+      categories.forEach((cat, index) => {
+        if (index === categories.length - 1) {
+          categoryDist[cat] = remaining;
+        } else {
+          const portion = Math.round(remaining * (0.1 + Math.random() * 0.3));
+          categoryDist[cat] = portion;
+          remaining -= portion;
+        }
+      });
+      
+      result[stationId] = {
+        stationId,
+        totalProcessed: Math.round(baseRate * 60 * 7),
+        processingRate: currentRate,
+        currentHourProcessed: hourlyTotal,
+        averageArea: Math.round(25000 + Math.random() * 20000),
+        averageDepth: Math.round(50 + Math.random() * 50),
+        categoryDistribution: categoryDist,
+        lastProcessedTime: new Date(now.getTime() - Math.random() * 30000).toISOString()
+      };
+    });
+    
+    return result;
+  };
+
+  // Process data to calculate processing statistics
   useEffect(() => {
-    const updateProcessingData = () => {
-      setProcessingData(generateEquipmentProcessingData());
-    };
-
-    // 초기 데이터 로드
-    updateProcessingData();
-
-    // 30초마다 데이터 업데이트
-    const interval = setInterval(updateProcessingData, 30000);
-
+    if (hasRealData.objectLogs && objectLogsData?.results?.length > 0) {
+      // Real server data processing
+      const stats: { [key: string]: ProcessingStats } = {};
+      
+      const groupedData: { [key: string]: any[] } = objectLogsData.results.reduce((acc, log) => {
+        if (!acc[log.station_id]) acc[log.station_id] = [];
+        acc[log.station_id].push(log);
+        return acc;
+      }, {} as { [key: string]: any[] });
+      
+      Object.entries(groupedData).forEach(([stationId, logs]) => {
+        const recentLogs = logs.slice(-60);
+        const categoryDist = logs.reduce((acc, log) => {
+          acc[log.major_category] = (acc[log.major_category] || 0) + 1;
+          return acc;
+        }, {} as { [key: string]: number });
+        
+        const avgArea = Math.round(logs.reduce((sum, log) => sum + (log.area || 0), 0) / logs.length);
+        const avgDepth = Math.round(logs.reduce((sum, log) => sum + (log.depth || 0), 0) / logs.length);
+        
+        stats[stationId] = {
+          stationId,
+          totalProcessed: logs.length,
+          processingRate: Math.round(recentLogs.length * (60 / Math.max(1, recentLogs.length))),
+          currentHourProcessed: recentLogs.length,
+          averageArea: avgArea,
+          averageDepth: avgDepth,
+          categoryDistribution: categoryDist,
+          lastProcessedTime: logs[logs.length - 1]?.timestamp || new Date().toISOString()
+        };
+      });
+      
+      setProcessingData(stats);
+    } else {
+      // Use fallback data when no real server data
+      setProcessingData(generateFallbackProcessingData());
+    }
+    
+    // Update every 30 seconds for fallback data
+    const interval = setInterval(() => {
+      if (!hasRealData.objectLogs) {
+        setProcessingData(generateFallbackProcessingData());
+      }
+    }, 30000);
+    
     return () => clearInterval(interval);
-  }, []);
+  }, [objectLogsData, hasRealData.objectLogs]);
   
   const nodeTypes = {
     custom: CustomNode,
@@ -323,25 +475,42 @@ export const ProcessingLineFlow: React.FC = () => {
 
   // Helper function to create nodes with processing data
   const createNodesWithData = (equipment: Equipment[]) => {
-    return equipment.map((eq, index) => ({
-      id: eq.id,
-      type: 'custom',
-      position: { x: index * 250, y: 100 },
-      data: { 
-        label: (
-          <div className="flex items-center space-x-2">
-            {eq.icon}
-            <span className="text-xs">{language === 'ko' ? eq.nameKo : eq.name}</span>
-          </div>
-        ),
-        processingStats: eq.stationId ? processingData[eq.stationId] : null,
-        language
-      },
-      style: {
-        background: eq.status === 'online' ? '#dcfce7' : eq.status === 'warning' ? '#fef3c7' : '#fee2e2',
-        border: eq.status === 'online' ? '1px solid #16a34a' : eq.status === 'warning' ? '1px solid #d97706' : '1px solid #dc2626',
+    return equipment.map((eq, index) => {
+      // Update equipment status based on server data
+      let updatedStatus = eq.status;
+      if (eq.stationId && (hasRealData.alerts || hasRealData.operationState || hasRealData.machineHealth)) {
+        updatedStatus = getEquipmentStatus(eq.stationId);
       }
-    }));
+      
+      return {
+        id: eq.id,
+        type: 'custom',
+        position: { x: index * 250, y: 100 },
+        data: { 
+          label: (
+            <div className={cn(
+              "flex items-center space-x-2",
+              !hasRealData.objectLogs && "text-muted-foreground"
+            )}>
+              {eq.icon}
+              <span className="text-xs">{language === 'ko' ? eq.nameKo : eq.name}</span>
+            </div>
+          ),
+          processingStats: eq.stationId ? processingData[eq.stationId] : null,
+          language,
+          isServerData: hasRealData.objectLogs
+        },
+        style: {
+          background: !hasRealData.objectLogs
+            ? (updatedStatus === 'online' ? '#f1f5f9' : updatedStatus === 'warning' ? '#f8fafc' : '#f1f5f9')
+            : (updatedStatus === 'online' ? '#dcfce7' : updatedStatus === 'warning' ? '#fef3c7' : '#fee2e2'),
+          border: !hasRealData.objectLogs
+            ? '1px solid #cbd5e1'
+            : (updatedStatus === 'online' ? '1px solid #16a34a' : updatedStatus === 'warning' ? '1px solid #d97706' : '1px solid #dc2626'),
+          opacity: !hasRealData.objectLogs ? 0.7 : 1
+        }
+      };
+    });
   };
 
   // Initial nodes for the flow
@@ -393,7 +562,7 @@ export const ProcessingLineFlow: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle>
-          {language === 'ko' ? 'Site1 현황' : 'Site1 Status'}
+          {language === 'ko' ? `${selectedSite} 현황` : `${selectedSite} Status`}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -430,28 +599,39 @@ export const ProcessingLineFlow: React.FC = () => {
               </h4>
               <ScrollArea className="flex-1">
                 <div className="space-y-2 pr-2">
-                  {equipmentList.map((equipment) => (
-                    <div
-                      key={equipment.id}
-                      className={cn(
-                        "flex items-center justify-between p-2 border rounded cursor-pointer transition-colors",
-                        selectedEquipment.find(eq => eq.id === equipment.id)
-                          ? "border-primary bg-primary/10"
-                          : "border-border hover:bg-muted/50"
-                      )}
-                      onClick={() => handleEquipmentClick(equipment)}
-                    >
-                      <div className="flex items-center space-x-2">
-                        {equipment.icon}
-                        <span className="text-sm">
-                          {language === 'ko' ? equipment.nameKo : equipment.name}
-                        </span>
+                  {selectedEquipment.map((equipment) => {
+                    // Update equipment status based on server data
+                    let updatedStatus = equipment.status;
+                    if (equipment.stationId && (hasRealData.alerts || hasRealData.operationState || hasRealData.machineHealth)) {
+                      updatedStatus = getEquipmentStatus(equipment.stationId);
+                    }
+                    
+                    return (
+                      <div
+                        key={equipment.id}
+                        className={cn(
+                          "flex items-center justify-between p-2 border rounded cursor-pointer transition-colors",
+                          selectedEquipment.find(eq => eq.id === equipment.id)
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:bg-muted/50"
+                        )}
+                        onClick={() => handleEquipmentClick(equipment)}
+                      >
+                        <div className="flex items-center space-x-2">
+                          {equipment.icon}
+                          <span className="text-sm">
+                            {language === 'ko' ? equipment.nameKo : equipment.name}
+                          </span>
+                        </div>
+                        <Badge variant={getStatusColor(updatedStatus)} className={cn(
+                          "text-xs",
+                          !hasRealData.operationState && "bg-muted/50"
+                        )}>
+                          {getStatusText(updatedStatus, language)}
+                        </Badge>
                       </div>
-                      <Badge variant={getStatusColor(equipment.status)} className="text-xs">
-                        {getStatusText(equipment.status, language)}
-                      </Badge>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </ScrollArea>
             </div>

@@ -1,4 +1,4 @@
-import type { PaginatedResponse } from '@/shared/types/api';
+import type { PaginatedResponse } from '@/entities/shared';
 
 // Object Logs Types
 export interface GetObjectLogsParams {

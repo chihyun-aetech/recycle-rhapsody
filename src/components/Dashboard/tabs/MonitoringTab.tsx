@@ -3,9 +3,76 @@ import { useDashboard } from '../DashboardLayout';
 import { StatusBar } from '../components/StatusBar';
 import { ProcessingLineFlow } from '../components/ProcessingLineFlow';
 import { SystemLogs } from '../components/SystemLogs';
+import { 
+  useObjectLogs, 
+  useSystemHealth, 
+  useAlerts, 
+  useOperationState, 
+  useMachineHealth 
+} from '@/entities/monitoring/queries';
 
 export const MonitoringTab: React.FC = () => {
-  const { language } = useDashboard();
+  const { language, selectedSite } = useDashboard();
+  
+  // Helper function to extract site from station_id
+  const extractSiteFromStationId = (stationId: string): string => {
+    // Remove last digit(s) from station_id: "R&T1" -> "R&T", "SUNGNAM2" -> "SUNGNAM"
+    return stationId.replace(/\d+$/, '');
+  };
+  
+  // Fetch all monitoring data filtered by selected site
+  const { data: objectLogsData, isLoading: objectLogsLoading } = useObjectLogs({});
+  const { data: systemHealthData, isLoading: systemHealthLoading } = useSystemHealth({});
+  const { data: alertsData, isLoading: alertsLoading } = useAlerts({});
+  const { data: operationStateData, isLoading: operationStateLoading } = useOperationState({});
+  const { data: machineHealthData, isLoading: machineHealthLoading } = useMachineHealth({});
+  
+  // Filter data by selected site
+  const filteredObjectLogsData = objectLogsData ? {
+    ...objectLogsData,
+    results: objectLogsData.results?.filter(log => 
+      extractSiteFromStationId(log.station_id) === selectedSite
+    ) || []
+  } : undefined;
+  
+  const filteredSystemHealthData = systemHealthData ? {
+    ...systemHealthData,
+    results: systemHealthData.results?.filter(system => 
+      extractSiteFromStationId(system.station_id) === selectedSite
+    ) || []
+  } : undefined;
+  
+  const filteredAlertsData = alertsData ? {
+    ...alertsData,
+    results: alertsData.results?.filter(alert => 
+      extractSiteFromStationId(alert.station_id) === selectedSite
+    ) || []
+  } : undefined;
+  
+  const filteredOperationStateData = operationStateData ? {
+    ...operationStateData,
+    results: operationStateData.results?.filter(operation => 
+      extractSiteFromStationId(operation.station_id) === selectedSite
+    ) || []
+  } : undefined;
+  
+  const filteredMachineHealthData = machineHealthData ? {
+    ...machineHealthData,
+    results: machineHealthData.results?.filter(machine => 
+      extractSiteFromStationId(machine.station_id) === selectedSite
+    ) || []
+  } : undefined;
+
+  // Determine if we have real server data or need to show fallback data (based on filtered data)
+  const hasRealData = {
+    objectLogs: !!(filteredObjectLogsData?.results?.length),
+    systemHealth: !!(filteredSystemHealthData?.results?.length),
+    alerts: !!(filteredAlertsData?.results?.length),
+    operationState: !!(filteredOperationStateData?.results?.length),
+    machineHealth: !!(filteredMachineHealthData?.results?.length)
+  };
+
+  const isLoading = objectLogsLoading || systemHealthLoading || alertsLoading || operationStateLoading || machineHealthLoading;
 
   return (
     <div className="p-6 space-y-6">
@@ -15,17 +82,36 @@ export const MonitoringTab: React.FC = () => {
         </h1>
         <div className="text-sm text-muted-foreground">
           {language === 'ko' ? '실시간 하드웨어 모니터링' : 'Real-time Hardware Monitoring'}
+          {isLoading && <span className="ml-2">Loading...</span>}
         </div>
       </div>
 
-      {/* Status Bar */}
-      <StatusBar />
+      {/* Status Bar - Pass filtered server data and hasRealData flags */}
+      <StatusBar 
+        systemHealthData={filteredSystemHealthData}
+        machineHealthData={filteredMachineHealthData}
+        hasRealData={hasRealData}
+        selectedSite={selectedSite}
+      />
 
-      {/* Processing Line Flow */}
-      <ProcessingLineFlow />
+      {/* Processing Line Flow - Pass filtered server data and hasRealData flags */}
+      <ProcessingLineFlow 
+        objectLogsData={filteredObjectLogsData}
+        operationStateData={filteredOperationStateData}
+        alertsData={filteredAlertsData}
+        machineHealthData={filteredMachineHealthData}
+        hasRealData={hasRealData}
+        selectedSite={selectedSite}
+      />
 
-      {/* System Logs */}
-      <SystemLogs />
+      {/* System Logs - Pass filtered server data and hasRealData flags */}
+      <SystemLogs 
+        objectLogsData={filteredObjectLogsData}
+        alertsData={filteredAlertsData}
+        machineHealthData={filteredMachineHealthData}
+        hasRealData={hasRealData}
+        selectedSite={selectedSite}
+      />
     </div>
   );
 };

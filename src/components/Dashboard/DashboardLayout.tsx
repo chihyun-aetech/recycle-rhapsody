@@ -29,6 +29,8 @@ interface DashboardContextType {
   setExpandedCard: (cardId: string | null) => void;
   selectedLine: number | null;
   setSelectedLine: (lineId: number | null) => void;
+  selectedSite: string;
+  setSelectedSite: (site: string) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | null>(null);
@@ -49,6 +51,7 @@ export const DashboardLayout: React.FC = () => {
   const [language, setLanguage] = useState<Language>('ko');
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [selectedLine, setSelectedLine] = useState<number | null>(null);
+  const [selectedSite, setSelectedSite] = useState<string>('R&T');
 
   useEffect(() => {
     if (user?.level === 'admin') {
@@ -69,6 +72,8 @@ export const DashboardLayout: React.FC = () => {
     setExpandedCard,
     selectedLine,
     setSelectedLine,
+    selectedSite,
+    setSelectedSite,
   };
 
   const fontSizeClasses = {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Sun, Moon, Globe, Type, Settings } from 'lucide-react';
+import { Bell, Sun, Moon, Globe, Type, Settings, ChevronDown, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -38,6 +38,8 @@ export const Navigation: React.FC = () => {
   const setTheme = dashboardContext?.setTheme || setLocalTheme;
   const language = dashboardContext?.language || localLanguage;
   const setLanguage = dashboardContext?.setLanguage || setLocalLanguage;
+  const selectedSite = dashboardContext?.selectedSite || 'R&T';
+  const setSelectedSite = dashboardContext?.setSelectedSite || (() => {});
 
   // Apply theme and font size when using local state
   React.useEffect(() => {
@@ -76,10 +78,13 @@ export const Navigation: React.FC = () => {
     { key: 'large' as const, label: 'L' },
   ];
 
+  // Available sites - based on real data
+  const availableSites = ['R&T', 'SUNGNAM'];
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card border-b border-border backdrop-blur-sm">
       <div className="flex items-center justify-between px-4 lg:px-6 py-3 relative">
-        {/* Logo */}
+        {/* Logo with Site Selector */}
         <div className="flex items-center space-x-2 min-w-0">
           <div className="w-8 h-8 bg-gradient-blue rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-lg">A</span>
@@ -90,6 +95,41 @@ export const Navigation: React.FC = () => {
           >
             Atronet
           </h1>
+          
+          {/* Site Selector - only show when dashboard context is available */}
+          {dashboardContext && (
+            <div className="hidden sm:block">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-3 h-8 px-2 text-xs bg-muted/50 hover:font-bold hover:bg-muted hover:text-black"
+                  >
+                    <MapPin className="w-3 h-3 mr-1" />
+                    {selectedSite}
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2" align="start" side="bottom" sideOffset={4}>
+                  <div className="flex flex-col space-y-1">
+                    {availableSites.map((site) => (
+                      <Button
+                        key={site}
+                        variant={selectedSite === site ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setSelectedSite(site)}
+                        className="justify-start w-full text-xs"
+                      >
+                        <MapPin className="w-3 h-3 mr-2" />
+                        {site}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          )}
         </div>
 
         {/* Tabs */}

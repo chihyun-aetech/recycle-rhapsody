@@ -5,95 +5,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useDashboard } from '../DashboardLayout';
 import { cn } from '@/lib/utils';
 
-interface LogEntry {
-  id: string;
-  timestamp: string;
-  robot_id: string;
-  line_id: number;
-  cpu_temp: number;
-  gpu_temp: number;
-  camera_temp: number;
-  imu_vibration: number;
-  conveyor_speed: number;
-  severity: 'info' | 'warning' | 'critical';
-  type: string;
-  details: string;
+
+interface SystemLogsProps {
+  objectLogsData?: any;
+  alertsData?: any;
+  machineHealthData?: any;
+  hasRealData: {
+    objectLogs: boolean;
+    alerts: boolean;
+    machineHealth: boolean;
+    [key: string]: boolean;
+  };
+  selectedSite: string;
 }
 
-const logsData: LogEntry[] = [
-  {
-    id: 'log-001',
-    timestamp: '2024-01-31 14:30:25',
-    robot_id: 'RBT-001',
-    line_id: 3,
-    cpu_temp: 75,
-    gpu_temp: 82,
-    camera_temp: 45,
-    imu_vibration: 1.2,
-    conveyor_speed: 2.4,
-    severity: 'critical',
-    type: 'overheat_gpu',
-    details: 'GPU temperature exceeded threshold (80°C)',
-  },
-  {
-    id: 'log-002',
-    timestamp: '2024-01-31 14:25:10',
-    robot_id: 'RBT-002',
-    line_id: 1,
-    cpu_temp: 68,
-    gpu_temp: 72,
-    camera_temp: 42,
-    imu_vibration: 0.8,
-    conveyor_speed: 2.2,
-    severity: 'warning',
-    type: 'picking_failure_rate_increase',
-    details: 'Picking success rate dropped to 92%',
-  },
-  {
-    id: 'log-003',
-    timestamp: '2024-01-31 14:20:00',
-    robot_id: 'RBT-003',
-    line_id: 2,
-    cpu_temp: 65,
-    gpu_temp: 70,
-    camera_temp: 40,
-    imu_vibration: 0.6,
-    conveyor_speed: 2.5,
-    severity: 'info',
-    type: 'system_check_complete',
-    details: 'Routine system check completed successfully',
-  },
-  {
-    id: 'log-004',
-    timestamp: '2024-01-31 14:15:30',
-    robot_id: 'RBT-001',
-    line_id: 3,
-    cpu_temp: 72,
-    gpu_temp: 76,
-    camera_temp: 43,
-    imu_vibration: 0.9,
-    conveyor_speed: 2.3,
-    severity: 'warning',
-    type: 'sensor_error',
-    details: 'Camera sensor calibration drift detected',
-  },
-  {
-    id: 'log-005',
-    timestamp: '2024-01-31 14:10:15',
-    robot_id: 'RBT-004',
-    line_id: 4,
-    cpu_temp: 66,
-    gpu_temp: 71,
-    camera_temp: 41,
-    imu_vibration: 0.7,
-    conveyor_speed: 2.6,
-    severity: 'info',
-    type: 'maintenance_complete',
-    details: 'Scheduled maintenance completed on Line 4',
-  },
-];
-
-export const SystemLogs: React.FC = () => {
+export const SystemLogs: React.FC<SystemLogsProps> = ({ 
+  objectLogsData, 
+  alertsData,
+  machineHealthData,
+  hasRealData,
+  selectedSite
+}) => {
   const { language } = useDashboard();
   const [focusedLogId, setFocusedLogId] = React.useState<string | null>(null);
 
@@ -146,30 +78,223 @@ export const SystemLogs: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {logsData.map((log) => (
-                <TableRow
-                  key={log.id}
-                  id={`log-row-${log.id}`}
-                  className={cn(
-                    'transition-all duration-500',
-                    focusedLogId === log.id && 'bg-primary/10 border-l-4 border-l-primary shadow-md'
-                  )}
-                >
-                  <TableCell className="font-mono text-xs">{log.timestamp}</TableCell>
-                  <TableCell className="font-medium">{log.robot_id}</TableCell>
-                  <TableCell>{log.line_id}</TableCell>
-                  <TableCell className={log.cpu_temp > 70 ? 'text-red-600 font-medium' : ''}>{log.cpu_temp}</TableCell>
-                  <TableCell className={log.gpu_temp > 75 ? 'text-red-600 font-medium' : ''}>{log.gpu_temp}</TableCell>
-                  <TableCell className={log.camera_temp > 45 ? 'text-red-600 font-medium' : ''}>{log.camera_temp}</TableCell>
-                  <TableCell className={log.imu_vibration > 1.0 ? 'text-red-600 font-medium' : ''}>{log.imu_vibration}</TableCell>
-                  <TableCell>{log.conveyor_speed}</TableCell>
-                  <TableCell>{getSeverityBadge(log.severity)}</TableCell>
-                  <TableCell className="font-mono text-xs">{log.type}</TableCell>
-                  <TableCell className="max-w-xs truncate" title={log.details}>
-                    {log.details}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {/* Show fallback data when no real server data */}
+              {(!hasRealData.objectLogs && !hasRealData.alerts && !hasRealData.machineHealth) ? (
+                // Mock data when server data is not available
+                [
+                  {
+                    id: 'log-001',
+                    timestamp: new Date().toISOString(),
+                    station_id: `${selectedSite}1`,
+                    cpu_temp: 68,
+                    gpu_temp: 72,
+                    camera_temp: 42,
+                    imu_vibration: 0.8,
+                    conveyor_speed: 2.4,
+                    severity: 'info' as const,
+                    type: 'object_processed',
+                    details: 'Pet bottle processed successfully (Area: 25000px, Depth: 75mm)'
+                  },
+                  {
+                    id: 'log-002',
+                    timestamp: new Date(Date.now() - 300000).toISOString(),
+                    station_id: `${selectedSite}2`,
+                    cpu_temp: 72,
+                    gpu_temp: 78,
+                    camera_temp: 45,
+                    imu_vibration: 1.1,
+                    conveyor_speed: 2.2,
+                    severity: 'warning' as const,
+                    type: 'high_temperature',
+                    details: 'GPU temperature approaching threshold (78°C)'
+                  },
+                  {
+                    id: 'log-003',
+                    timestamp: new Date(Date.now() - 600000).toISOString(),
+                    station_id: `${selectedSite}3`,
+                    cpu_temp: 75,
+                    gpu_temp: 82,
+                    camera_temp: 48,
+                    imu_vibration: 1.3,
+                    conveyor_speed: 2.1,
+                    severity: 'critical' as const,
+                    type: 'overheat_gpu',
+                    details: 'GPU temperature exceeded threshold (82°C) - automatic shutdown initiated'
+                  },
+                  {
+                    id: 'log-004',
+                    timestamp: new Date(Date.now() - 900000).toISOString(),
+                    station_id: `${selectedSite}1`,
+                    cpu_temp: 65,
+                    gpu_temp: 70,
+                    camera_temp: 40,
+                    imu_vibration: 0.6,
+                    conveyor_speed: 2.5,
+                    severity: 'info' as const,
+                    type: 'system_check',
+                    details: 'Routine system health check completed successfully'
+                  },
+                  {
+                    id: 'log-005',
+                    timestamp: new Date(Date.now() - 1200000).toISOString(),
+                    station_id: `${selectedSite}2`,
+                    cpu_temp: 69,
+                    gpu_temp: 73,
+                    camera_temp: 43,
+                    imu_vibration: 0.9,
+                    conveyor_speed: 2.3,
+                    severity: 'info' as const,
+                    type: 'object_processed',
+                    details: 'Plastic container processed (Area: 18000px, Depth: 45mm)'
+                  }
+                ].map((log) => (
+                  <TableRow
+                    key={log.id}
+                    id={`log-row-${log.id}`}
+                    className={cn(
+                      'transition-all duration-500 bg-muted/20',
+                      focusedLogId === log.id && 'bg-primary/10 border-l-4 border-l-primary shadow-md'
+                    )}
+                  >
+                    <TableCell className="font-mono text-xs text-muted-foreground">{new Date(log.timestamp).toLocaleString()}</TableCell>
+                    <TableCell className="font-medium text-muted-foreground">{log.station_id}</TableCell>
+                    <TableCell className="text-muted-foreground">-</TableCell>
+                    <TableCell className={cn(
+                      "text-muted-foreground",
+                      log.cpu_temp > 70 ? 'text-red-600 font-medium' : ''
+                    )}>{log.cpu_temp}</TableCell>
+                    <TableCell className={cn(
+                      "text-muted-foreground",
+                      log.gpu_temp > 75 ? 'text-red-600 font-medium' : ''
+                    )}>{log.gpu_temp}</TableCell>
+                    <TableCell className={cn(
+                      "text-muted-foreground",
+                      log.camera_temp > 45 ? 'text-red-600 font-medium' : ''
+                    )}>{log.camera_temp}</TableCell>
+                    <TableCell className={cn(
+                      "text-muted-foreground",
+                      log.imu_vibration > 1.0 ? 'text-red-600 font-medium' : ''
+                    )}>{log.imu_vibration}</TableCell>
+                    <TableCell className="text-muted-foreground">{log.conveyor_speed}</TableCell>
+                    <TableCell>{getSeverityBadge(log.severity)}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">{log.type}</TableCell>
+                    <TableCell className="max-w-xs truncate text-muted-foreground" title={log.details}>
+                      {log.details}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                // Real server data available - normal styling
+                <>
+                  {/* Object Logs - Real Data */}
+                  {hasRealData.objectLogs && objectLogsData?.results?.slice(0, 5).map((log) => (
+                    <TableRow
+                      key={log.id || log.timestamp}
+                      id={`log-row-${log.id || log.timestamp}`}
+                      className={cn(
+                        'transition-all duration-500',
+                        focusedLogId === log.id && 'bg-primary/10 border-l-4 border-l-primary shadow-md'
+                      )}
+                    >
+                      <TableCell className="font-mono text-xs">{new Date(log.timestamp).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">{log.station_id}</TableCell>
+                      <TableCell className="text-muted-foreground">-</TableCell>
+                      <TableCell className="text-muted-foreground">-</TableCell>
+                      <TableCell className="text-muted-foreground">-</TableCell>
+                      <TableCell className="text-muted-foreground">-</TableCell>
+                      <TableCell className="text-muted-foreground">-</TableCell>
+                      <TableCell className="text-muted-foreground">-</TableCell>
+                      <TableCell>{getSeverityBadge('info')}</TableCell>
+                      <TableCell className="font-mono text-xs">object_processed</TableCell>
+                      <TableCell className="max-w-xs truncate" title={`${log.major_category} processed (Area: ${log.area}px, Depth: ${log.depth}mm)`}>
+                        {log.major_category} processed (Area: {log.area}px, Depth: {log.depth}mm)
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  
+                  {/* Alerts - Real Data */}
+                  {hasRealData.alerts && alertsData?.results?.slice(0, 10).map((alert) => {
+                    const severity = alert.severity === 'critical' ? 'critical' : alert.severity === 'warning' ? 'warning' : 'info';
+                    return (
+                      <TableRow
+                        key={alert.id || alert.timestamp}
+                        id={`log-row-${alert.id || alert.timestamp}`}
+                        className={cn(
+                          'transition-all duration-500',
+                          focusedLogId === alert.id && 'bg-primary/10 border-l-4 border-l-primary shadow-md'
+                        )}
+                      >
+                        <TableCell className="font-mono text-xs">{new Date(alert.timestamp).toLocaleString()}</TableCell>
+                        <TableCell className="font-medium">{alert.station_id}</TableCell>
+                        <TableCell className="text-muted-foreground">-</TableCell>
+                        <TableCell className="text-muted-foreground">-</TableCell>
+                        <TableCell className="text-muted-foreground">-</TableCell>
+                        <TableCell className="text-muted-foreground">-</TableCell>
+                        <TableCell className="text-muted-foreground">-</TableCell>
+                        <TableCell className="text-muted-foreground">-</TableCell>
+                        <TableCell>{getSeverityBadge(severity)}</TableCell>
+                        <TableCell className="font-mono text-xs">{alert.alert_type}</TableCell>
+                        <TableCell className="max-w-xs truncate" title={alert.message}>
+                          {alert.message}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  
+                  {/* Machine Health - Real Data */}
+                  {hasRealData.machineHealth && machineHealthData?.results?.slice(0, 5).map((machine) => {
+                    // Determine severity based on temperature thresholds
+                    const cpuTemp = machine.cpu_temperature || 0;
+                    const gpuTemp = machine.gpu_temperature || 0;
+                    const cameraTemp = machine.camera_temperature || 0;
+                    
+                    let severity = 'info';
+                    let alertType = 'health_check';
+                    let message = 'System health normal';
+                    
+                    if (cpuTemp > 80 || gpuTemp > 85) {
+                      severity = 'critical';
+                      alertType = 'overheat';
+                      message = `Critical temperature: CPU ${cpuTemp}°C, GPU ${gpuTemp}°C`;
+                    } else if (cpuTemp > 70 || gpuTemp > 75) {
+                      severity = 'warning';
+                      alertType = 'high_temperature';
+                      message = `High temperature: CPU ${cpuTemp}°C, GPU ${gpuTemp}°C`;
+                    }
+                    
+                    return (
+                      <TableRow
+                        key={`machine-${machine.station_id}-${machine.timestamp}`}
+                        id={`log-row-machine-${machine.station_id}-${machine.timestamp}`}
+                        className={cn(
+                          'transition-all duration-500',
+                          focusedLogId === `machine-${machine.station_id}` && 'bg-primary/10 border-l-4 border-l-primary shadow-md'
+                        )}
+                      >
+                        <TableCell className="font-mono text-xs">{new Date(machine.timestamp).toLocaleString()}</TableCell>
+                        <TableCell className="font-medium">{machine.station_id}</TableCell>
+                        <TableCell className="text-muted-foreground">-</TableCell>
+                        <TableCell className={cn(
+                          cpuTemp > 70 ? 'text-red-600 font-medium' : ''
+                        )}>{cpuTemp}</TableCell>
+                        <TableCell className={cn(
+                          gpuTemp > 75 ? 'text-red-600 font-medium' : ''
+                        )}>{gpuTemp}</TableCell>
+                        <TableCell className={cn(
+                          cameraTemp > 45 ? 'text-red-600 font-medium' : ''
+                        )}>{cameraTemp || '-'}</TableCell>
+                        <TableCell className="text-muted-foreground">-</TableCell>
+                        <TableCell className="text-muted-foreground">-</TableCell>
+                        <TableCell>{getSeverityBadge(severity)}</TableCell>
+                        <TableCell className="font-mono text-xs">{alertType}</TableCell>
+                        <TableCell className="max-w-xs truncate" title={message}>
+                          {message}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </>
+              )}
             </TableBody>
           </Table>
         </div>

@@ -5,52 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Cpu, Camera, Activity, Gauge, HardDrive, MemoryStick } from 'lucide-react';
 import { useDashboard } from '../DashboardLayout';
+import { cn } from '@/lib/utils';
 
-const hardwareData = {
-  computers: [
-    {
-      id: 'pc-001',
-      name: 'Production PC 1',
-      cpu: { usage: 52.75, temp: 68 },
-      gpu: { usage: 71, temp: 72 },
-      ram: { usage: 64.2 },
-    },
-    {
-      id: 'pc-002', 
-      name: 'Production PC 2',
-      cpu: { usage: 48.3, temp: 65 },
-      gpu: { usage: 83, temp: 76 },
-      ram: { usage: 58.7 },
-    },
-  ],
-  sensors: [
-    {
-      id: 'cam-001',
-      name: 'Camera Temperature',
-      value: 42,
-      unit: '°C',
-      status: 'Good',
-      icon: Camera,
-    },
-    {
-      id: 'imu-001', 
-      name: 'IMU Vibration',
-      value: 0.8,
-      unit: 'g',
-      status: 'Normal',
-      icon: Activity,
-    },
-  ],
-  conveyor: {
-    speed: 2.4,
-    unit: 'm/s',
-    status: 'Normal',
-  },
-};
 
-const CircularProgress: React.FC<{ 
-  value: number; 
-  size?: number; 
+const CircularProgress: React.FC<{
+  value: number;
+  size?: number;
   strokeWidth?: number;
   color?: string;
 }> = ({ value, size = 120, strokeWidth = 8, color = 'hsl(var(--primary))' }) => {
@@ -90,7 +50,23 @@ const CircularProgress: React.FC<{
   );
 };
 
-export const StatusBar: React.FC = () => {
+interface StatusBarProps {
+  systemHealthData?: any;
+  machineHealthData?: any;
+  hasRealData: {
+    systemHealth: boolean;
+    machineHealth: boolean;
+    [key: string]: boolean;
+  };
+  selectedSite: string;
+}
+
+export const StatusBar: React.FC<StatusBarProps> = ({
+  systemHealthData,
+  machineHealthData,
+  hasRealData,
+  selectedSite
+}) => {
   const { language } = useDashboard();
   const [selectedDetail, setSelectedDetail] = useState<string | null>(null);
 
@@ -109,117 +85,46 @@ export const StatusBar: React.FC = () => {
   };
 
   const renderDetailDialog = () => {
-    if (!selectedDetail) return null;
+    if (!selectedDetail || !machineHealthData?.results) return null;
 
-    if (selectedDetail.startsWith('pc-')) {
-      const computer = hardwareData.computers.find(pc => pc.id === selectedDetail);
-      if (!computer) return null;
+    const machineData = machineHealthData.results.find(machine => machine.station_id === selectedDetail);
+    if (!machineData) return null;
 
-      return (
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <Cpu className="w-5 h-5" />
-              <span>{computer.name}</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-3 gap-6 p-6">
-            <div className="flex flex-col items-center space-y-2">
-              <CircularProgress value={computer.cpu.usage} size={100} />
-              <div className="text-center">
-                <div className="text-sm font-medium">CPU</div>
-                <div className="text-xs text-muted-foreground">{computer.cpu.temp}°C</div>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center space-y-2">
-              <CircularProgress value={computer.gpu.usage} size={100} />
-              <div className="text-center">
-                <div className="text-sm font-medium">GPU</div>
-                <div className="text-xs text-muted-foreground">{computer.gpu.temp}°C</div>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center space-y-2">
-              <CircularProgress value={computer.ram.usage} size={100} />
-              <div className="text-center">
-                <div className="text-sm font-medium">RAM</div>
-                <div className="text-xs text-muted-foreground">Memory</div>
-              </div>
+    return (
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
+            <Cpu className="w-5 h-5" />
+            <span>{language === 'ko' ? `${machineData.station_id} 상세` : `${machineData.station_id} Details`}</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-3 gap-6 p-6">
+          <div className="flex flex-col items-center space-y-2">
+            <CircularProgress value={machineData.cpu_usage || 0} size={100} />
+            <div className="text-center">
+              <div className="text-sm font-medium">CPU</div>
+              <div className="text-xs text-muted-foreground">{machineData.cpu_temperature}°C</div>
             </div>
           </div>
-        </DialogContent>
-      );
-    }
 
-    if (selectedDetail === 'vision-box') {
-      const sensorData = [
-        { 
-          name: 'Camera Temperature', 
-          value: '42°C', 
-          status: 'normal',
-          icon: Camera,
-          nameKo: '카메라 온도'
-        },
-        { 
-          name: 'IMU Vibration', 
-          value: '0.2G', 
-          status: 'normal',
-          icon: Activity,
-          nameKo: 'IMU 진동'
-        },
-        { 
-          name: 'CPU Usage', 
-          value: '68%', 
-          status: 'normal',
-          icon: Cpu,
-          nameKo: 'CPU 사용률'
-        },
-        { 
-          name: 'GPU Temperature', 
-          value: '71°C', 
-          status: 'warning',
-          icon: Camera,
-          nameKo: 'GPU 온도'
-        }
-      ];
-
-      return (
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <Camera className="w-5 h-5" />
-              <span>{language === 'ko' ? '비전 박스 상세' : 'Vision Box Details'}</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 p-6">
-            {sensorData.map((sensor, index) => {
-              const Icon = sensor.icon;
-              return (
-                <div key={index} className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Icon className="w-5 h-5 text-muted-foreground" />
-                    <Badge variant={getStatusColor(sensor.status) as any}>
-                      {sensor.status}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {language === 'ko' ? sensor.nameKo : sensor.name}
-                    </p>
-                    <p className="text-xl font-bold text-foreground">
-                      {sensor.value}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="flex flex-col items-center space-y-2">
+            <CircularProgress value={machineData.gpu_usage || 0} size={100} />
+            <div className="text-center">
+              <div className="text-sm font-medium">GPU</div>
+              <div className="text-xs text-muted-foreground">{machineData.gpu_temperature}°C</div>
+            </div>
           </div>
-        </DialogContent>
-      );
-    }
 
-    return null;
+          <div className="flex flex-col items-center space-y-2">
+            <CircularProgress value={machineData.memory_usage || 0} size={100} />
+            <div className="text-center">
+              <div className="text-sm font-medium">RAM</div>
+              <div className="text-xs text-muted-foreground">Memory</div>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    );
   };
 
   return (
@@ -227,76 +132,109 @@ export const StatusBar: React.FC = () => {
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            {/* Production PCs */}
-            {hardwareData.computers.map((computer) => (
-              <Button
-                key={computer.id}
-                variant="ghost"
-                className="group flex items-center space-x-2 h-auto p-2"
-                onClick={() => setSelectedDetail(computer.id)}
-              >
-                <Cpu className="w-4 h-4" />
-                <div className="text-left">
-                  <div className="text-xs font-medium">{computer.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    <span className="group-hover:font-bold group-hover:text-black dark:group-hover:text-white">CPU: {computer.cpu.usage}%</span>{" "}
-                    <span className="group-hover:font-bold group-hover:text-black dark:group-hover:text-white">GPU: {computer.gpu.usage}%</span>
-                  </div>
-                </div>
-              </Button>
-            ))}
-
-            {/* Sensors */}
-            {hardwareData.sensors.map((sensor) => {
-              const Icon = sensor.icon;
-              return (
-                <div key={sensor.id} className="flex items-center space-x-2 px-2">
-                  <Icon className="w-4 h-4" />
+            {/* Machine Health Data */}
+            {hasRealData.machineHealth && machineHealthData?.results?.length > 0 ? (
+              // Real server data - normal styling
+              machineHealthData.results.map((machine) => (
+                <Button
+                  key={machine.station_id}
+                  variant="ghost"
+                  className="group flex items-center space-x-2 h-auto p-2"
+                  onClick={() => setSelectedDetail(machine.station_id)}
+                >
+                  <Cpu className="w-4 h-4" />
                   <div className="text-left">
-                    <div className="text-xs font-medium">{sensor.name}</div>
+                    <div className="text-xs font-medium">{machine.station_id}</div>
                     <div className="text-xs text-muted-foreground">
-                      {sensor.value} {sensor.unit}
+                      <span className="group-hover:font-bold group-hover:text-black dark:group-hover:text-white">CPU: {machine.cpu_usage || 0}%</span>{" "}
+                      <span className="group-hover:font-bold group-hover:text-black dark:group-hover:text-white">GPU: {machine.gpu_usage || 0}%</span>
                     </div>
                   </div>
-                  <Badge variant={getStatusColor(sensor.status) as any} className="text-xs">
-                    {sensor.status}
+                </Button>
+              ))
+            ) : (
+              // Fallback/dummy data - gray styling (based on selected site)
+              [1, 2, 3].map((index) => {
+                const stationId = `${selectedSite}${index}`; // "R&T1", "SUNGNAM2" format
+                return (
+                  <Button
+                    key={stationId}
+                    variant="ghost"
+                    className="group flex items-center space-x-2 h-auto p-2 bg-muted/30 hover:bg-muted/50"
+                    onClick={() => setSelectedDetail(stationId)}
+                  >
+                    <Cpu className="w-4 h-4 text-muted-foreground" />
+                    <div className="text-left">
+                      <div className="text-xs font-medium text-muted-foreground">{stationId}</div>
+                      <div className="text-xs text-muted-foreground">
+                        <span className="group-hover:font-bold">CPU: {Math.round(50 + Math.random() * 30)}%</span>{" "}
+                        <span className="group-hover:font-bold">GPU: {Math.round(60 + Math.random() * 25)}%</span>
+                      </div>
+                    </div>
+                  </Button>
+                );
+              })
+            )}
+
+            {/* Sensor Data */}
+            {hasRealData.systemHealth && systemHealthData?.results?.length > 0 ? (
+              // Real server data - normal styling
+              systemHealthData.results.slice(0, 2).map((system, index) => (
+                <div key={`${system.station_id}-${index}`} className="flex items-center space-x-2 px-2">
+                  <Camera className="w-4 h-4" />
+                  <div className="text-left">
+                    <div className="text-xs font-medium">{system.station_id} Health</div>
+                    <div className="text-xs text-muted-foreground">
+                      {language === 'ko' ? '정상' : 'Normal'}
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    {language === 'ko' ? '온라인' : 'Online'}
                   </Badge>
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              // Fallback/dummy sensor data - gray styling
+              [
+                { name: 'Camera Temp', nameKo: '카메라 온도', value: '42°C', icon: Camera, status: 'Normal' },
+                { name: 'IMU Vibration', nameKo: 'IMU 진동', value: '0.8g', icon: Activity, status: 'Normal' }
+              ].map((sensor, index) => {
+                const Icon = sensor.icon;
+                return (
+                  <div key={index} className="flex items-center space-x-2 px-2 py-1 bg-muted/30 rounded">
+                    <Icon className="w-4 h-4 text-muted-foreground" />
+                    <div className="text-left">
+                      <div className="text-xs font-medium text-muted-foreground">{language === 'ko' ? sensor.nameKo : sensor.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {sensor.value}
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="text-xs bg-muted/50">
+                      {language === 'ko' ? '정상' : sensor.status}
+                    </Badge>
+                  </div>
+                );
+              })
+            )}
 
-            {/* Conveyor Speed */}
-            <div className="flex items-center space-x-2 px-2">
-              <Gauge className="w-4 h-4" />
+            {/* Conveyor Speed - Always fallback data (no server endpoint) */}
+            <div className={cn(
+              "flex items-center space-x-2 px-2 py-1 rounded",
+              "bg-muted/30" // Always gray since this is always fallback data
+            )}>
+              <Gauge className="w-4 h-4 text-muted-foreground" />
               <div className="text-left">
-                <div className="text-xs font-medium">
+                <div className="text-xs font-medium text-muted-foreground">
                   {language === 'ko' ? '컨베이어 속도' : 'Conveyor Speed'}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {hardwareData.conveyor.speed} {hardwareData.conveyor.unit}
+                  2.4 m/s
                 </div>
               </div>
-              <Badge variant={getStatusColor(hardwareData.conveyor.status) as any} className="text-xs">
-                {hardwareData.conveyor.status}
+              <Badge variant="secondary" className="text-xs bg-muted/50">
+                {language === 'ko' ? '정상' : 'Normal'}
               </Badge>
             </div>
-
-            {/* Vision Box */}
-            <Button
-              variant="ghost"
-              className="group flex items-center space-x-2 h-auto p-2"
-              onClick={() => setSelectedDetail('vision-box')}
-            >
-              <Camera className="w-4 h-4" />
-              <div className="text-left">
-                <div className="text-xs font-medium">
-                  {language === 'ko' ? '비전 박스' : 'Vision Box'}
-                </div>
-                <div className="text-xs text-muted-foreground group-hover:font-bold group-hover:text-black dark:group-hover:text-white">
-                  {language === 'ko' ? '상세 보기' : 'View Details'}
-                </div>
-              </div>
-            </Button>
           </div>
         </CardContent>
       </Card>
