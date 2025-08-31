@@ -1,4 +1,4 @@
-import type { BaseResponse, AlertsStats, SystemHealthStats, MachineHealthStats } from '@/entities/shared';
+import type { BaseResponse, AlertsStats, SystemHealthStats, MachineHealthStats } from '@/shared/api';
 
 // Period Health Statistics Types
 export interface GetPeriodHealthStatisticsParams {

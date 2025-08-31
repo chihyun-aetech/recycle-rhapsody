@@ -20,12 +20,15 @@ export const MonitoringTab: React.FC = () => {
     return stationId.replace(/\d+$/, '');
   };
   
-  // Fetch all monitoring data filtered by selected site
-  const { data: objectLogsData, isLoading: objectLogsLoading } = useObjectLogs({});
-  const { data: systemHealthData, isLoading: systemHealthLoading } = useSystemHealth({});
-  const { data: alertsData, isLoading: alertsLoading } = useAlerts({});
-  const { data: operationStateData, isLoading: operationStateLoading } = useOperationState({});
-  const { data: machineHealthData, isLoading: machineHealthLoading } = useMachineHealth({});
+  // Generate station IDs for selected site (e.g., R&T1, R&T2, R&T3)
+  const stationIds = [`${selectedSite}1`, `${selectedSite}2`, `${selectedSite}3`];
+  
+  // Fetch all monitoring data with specific station_ids
+  const { data: objectLogsData, isLoading: objectLogsLoading } = useObjectLogs({ station_ids: stationIds });
+  const { data: systemHealthData, isLoading: systemHealthLoading } = useSystemHealth({ station_ids: stationIds });
+  const { data: alertsData, isLoading: alertsLoading } = useAlerts({ station_ids: stationIds });
+  const { data: operationStateData, isLoading: operationStateLoading } = useOperationState({ station_ids: stationIds });
+  const { data: machineHealthData, isLoading: machineHealthLoading } = useMachineHealth({ station_ids: stationIds });
   
   // Filter data by selected site
   const filteredObjectLogsData = objectLogsData ? {

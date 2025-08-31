@@ -70,7 +70,6 @@ export const SystemLogs: React.FC<SystemLogsProps> = ({
                 <TableHead>CPU (°C)</TableHead>
                 <TableHead>GPU (°C)</TableHead>
                 <TableHead>{language === 'ko' ? '카메라' : 'Camera'} (°C)</TableHead>
-                <TableHead>{language === 'ko' ? '진동' : 'Vibration'} (g)</TableHead>
                 <TableHead>{language === 'ko' ? '속도' : 'Speed'} (m/s)</TableHead>
                 <TableHead>{language === 'ko' ? '심각도' : 'Severity'}</TableHead>
                 <TableHead>{language === 'ko' ? '유형' : 'Type'}</TableHead>
@@ -89,7 +88,6 @@ export const SystemLogs: React.FC<SystemLogsProps> = ({
                     cpu_temp: 68,
                     gpu_temp: 72,
                     camera_temp: 42,
-                    imu_vibration: 0.8,
                     conveyor_speed: 2.4,
                     severity: 'info' as const,
                     type: 'object_processed',
@@ -102,7 +100,6 @@ export const SystemLogs: React.FC<SystemLogsProps> = ({
                     cpu_temp: 72,
                     gpu_temp: 78,
                     camera_temp: 45,
-                    imu_vibration: 1.1,
                     conveyor_speed: 2.2,
                     severity: 'warning' as const,
                     type: 'high_temperature',
@@ -115,7 +112,6 @@ export const SystemLogs: React.FC<SystemLogsProps> = ({
                     cpu_temp: 75,
                     gpu_temp: 82,
                     camera_temp: 48,
-                    imu_vibration: 1.3,
                     conveyor_speed: 2.1,
                     severity: 'critical' as const,
                     type: 'overheat_gpu',
@@ -128,7 +124,6 @@ export const SystemLogs: React.FC<SystemLogsProps> = ({
                     cpu_temp: 65,
                     gpu_temp: 70,
                     camera_temp: 40,
-                    imu_vibration: 0.6,
                     conveyor_speed: 2.5,
                     severity: 'info' as const,
                     type: 'system_check',
@@ -141,7 +136,6 @@ export const SystemLogs: React.FC<SystemLogsProps> = ({
                     cpu_temp: 69,
                     gpu_temp: 73,
                     camera_temp: 43,
-                    imu_vibration: 0.9,
                     conveyor_speed: 2.3,
                     severity: 'info' as const,
                     type: 'object_processed',
@@ -171,10 +165,6 @@ export const SystemLogs: React.FC<SystemLogsProps> = ({
                       "text-muted-foreground",
                       log.camera_temp > 45 ? 'text-red-600 font-medium' : ''
                     )}>{log.camera_temp}</TableCell>
-                    <TableCell className={cn(
-                      "text-muted-foreground",
-                      log.imu_vibration > 1.0 ? 'text-red-600 font-medium' : ''
-                    )}>{log.imu_vibration}</TableCell>
                     <TableCell className="text-muted-foreground">{log.conveyor_speed}</TableCell>
                     <TableCell>{getSeverityBadge(log.severity)}</TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">{log.type}</TableCell>
@@ -231,7 +221,6 @@ export const SystemLogs: React.FC<SystemLogsProps> = ({
                         <TableCell className="text-muted-foreground">-</TableCell>
                         <TableCell className="text-muted-foreground">-</TableCell>
                         <TableCell className="text-muted-foreground">-</TableCell>
-                        <TableCell className="text-muted-foreground">-</TableCell>
                         <TableCell>{getSeverityBadge(severity)}</TableCell>
                         <TableCell className="font-mono text-xs">{alert.alert_type}</TableCell>
                         <TableCell className="max-w-xs truncate" title={alert.message}>
@@ -275,15 +264,14 @@ export const SystemLogs: React.FC<SystemLogsProps> = ({
                         <TableCell className="font-medium">{machine.station_id}</TableCell>
                         <TableCell className="text-muted-foreground">-</TableCell>
                         <TableCell className={cn(
-                          cpuTemp > 70 ? 'text-red-600 font-medium' : ''
+                          cpuTemp > 70 ? 'text-red-600 font-medium' : 'text-foreground'
                         )}>{cpuTemp}</TableCell>
                         <TableCell className={cn(
-                          gpuTemp > 75 ? 'text-red-600 font-medium' : ''
+                          gpuTemp > 75 ? 'text-red-600 font-medium' : 'text-foreground'
                         )}>{gpuTemp}</TableCell>
                         <TableCell className={cn(
-                          cameraTemp > 45 ? 'text-red-600 font-medium' : ''
+                          cameraTemp > 45 ? 'text-red-600 font-medium' : 'text-foreground'
                         )}>{cameraTemp || '-'}</TableCell>
-                        <TableCell className="text-muted-foreground">-</TableCell>
                         <TableCell className="text-muted-foreground">-</TableCell>
                         <TableCell>{getSeverityBadge(severity)}</TableCell>
                         <TableCell className="font-mono text-xs">{alertType}</TableCell>

@@ -15,19 +15,20 @@ import type {
   GetWeekSummaryResponse,
   GetMonthSummaryParams,
   GetMonthSummaryResponse,
-  BaseResponse,
 } from './types';
 
 // Query Keys
+const baseKey = ['stats'] as const;
+
 export const statsKeys = {
-  all: ['stats'] as const,
-  period: (params: GetPeriodStatisticsParams) => [...statsKeys.all, 'period', params] as const,
-  dailyReports: (params: GetDailyReportsParams) => [...statsKeys.all, 'daily-reports', params] as const,
-  hourlyReports: (params: GetHourlyReportsParams) => [...statsKeys.all, 'hourly-reports', params] as const,
-  todaySummary: (params: GetTodaySummaryParams) => [...statsKeys.all, 'today-summary', params] as const,
-  weekSummary: (params: GetWeekSummaryParams) => [...statsKeys.all, 'week-summary', params] as const,
-  monthSummary: (params: GetMonthSummaryParams) => [...statsKeys.all, 'month-summary', params] as const,
-  cacheStatus: [...statsKeys.all, 'cache-status'] as const,
+  all: baseKey,
+  period: (params: GetPeriodStatisticsParams) => [...baseKey, 'period', params] as const,
+  dailyReports: (params: GetDailyReportsParams) => [...baseKey, 'daily-reports', params] as const,
+  hourlyReports: (params: GetHourlyReportsParams) => [...baseKey, 'hourly-reports', params] as const,
+  todaySummary: (params: GetTodaySummaryParams) => [...baseKey, 'today-summary', params] as const,
+  weekSummary: (params: GetWeekSummaryParams) => [...baseKey, 'week-summary', params] as const,
+  monthSummary: (params: GetMonthSummaryParams) => [...baseKey, 'month-summary', params] as const,
+  cacheStatus: [...baseKey, 'cache-status'] as const,
 };
 
 // Queries

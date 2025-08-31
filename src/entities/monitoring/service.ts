@@ -1,4 +1,4 @@
-import { httpClient } from '@/entities/shared/config';
+import { httpClient } from '@/shared/api';
 import type {
   GetObjectLogsParams,
   GetObjectLogsResponse,

@@ -82,7 +82,7 @@ export const AlertDropdown: React.FC = () => {
           </h3>
         </div>
         {alertData.map((alert, index) => (
-          <React.Fragment key={alert.id}>
+          <div key={alert.id}>
             <DropdownMenuItem className="p-3 cursor-pointer">
               <div className="flex items-start space-x-3 w-full">
                 {getAlertIcon(alert.severity)}
@@ -100,7 +100,7 @@ export const AlertDropdown: React.FC = () => {
               </div>
             </DropdownMenuItem>
             {index < alertData.length - 1 && <DropdownMenuSeparator />}
-          </React.Fragment>
+          </div>
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem className="p-3 text-center">

@@ -133,3 +133,4 @@ export interface PickingStatistics {
   /** 세부 카테고리별 픽업 통계 */
   by_sub_category: CategoryCount[];
 }
+

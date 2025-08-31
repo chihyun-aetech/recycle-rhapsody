@@ -1,4 +1,4 @@
-import type { BaseResponse, DetectionStatistics, PickingStatistics } from '@/shared/types/api';
+import type { BaseResponse, DetectionStatistics, PickingStatistics } from '@/shared/api';
 
 // Period Statistics Types
 export interface GetPeriodStatisticsParams {

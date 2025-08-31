@@ -1,5 +1,5 @@
 export * from './types';
-export { systemService } from '../shared';
+export { systemService } from './service';
 
 export type {
 //   SystemStatus,

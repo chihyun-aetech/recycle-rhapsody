@@ -196,8 +196,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
             ) : (
               // Fallback/dummy sensor data - gray styling
               [
-                { name: 'Camera Temp', nameKo: '카메라 온도', value: '42°C', icon: Camera, status: 'Normal' },
-                { name: 'IMU Vibration', nameKo: 'IMU 진동', value: '0.8g', icon: Activity, status: 'Normal' }
+                { name: 'Camera Temp', nameKo: '카메라 온도', value: '42°C', icon: Camera, status: 'Normal' }
               ].map((sensor, index) => {
                 const Icon = sensor.icon;
                 return (

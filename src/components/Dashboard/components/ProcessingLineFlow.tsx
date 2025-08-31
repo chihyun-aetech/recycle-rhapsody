@@ -46,14 +46,14 @@ interface ProcessingStats {
 
 
 const equipmentList: Equipment[] = [
-  { id: 'vision-box-1', name: 'Vision Box #1', nameKo: 'Vision Box #1', icon: <Camera className="w-4 h-4" />, status: 'online', type: 'camera' },
-  { id: 'vision-box-2', name: 'Vision Box #2', nameKo: 'Vision Box #2', icon: <Camera className="w-4 h-4" />, status: 'warning', type: 'camera' },
-  { id: 'vision-box-3', name: 'Vision Box #3', nameKo: 'Vision Box #3', icon: <Camera className="w-4 h-4" />, status: 'offline', type: 'camera' },
-  { id: 'atron-1', name: 'Atron H/W #1', nameKo: 'Atron H/W #1', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron' },
-  { id: 'atron-2', name: 'Atron H/W #2', nameKo: 'Atron H/W #2', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron' },
-  { id: 'atron-3', name: 'Atron H/W #3', nameKo: 'Atron H/W #3', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron' },
-  { id: 'input-1', name: 'Input', nameKo: 'Input', icon: <Package className="w-4 h-4" />, status: 'online', type: 'input' },
-  { id: 'output-1', name: 'Output', nameKo: 'Output', icon: <Zap className="w-4 h-4" />, status: 'online', type: 'output' },
+  { id: 'vision-box-1', name: 'Vision Box #1', nameKo: 'Vision Box #1', icon: <Camera className="w-4 h-4" />, status: 'online', type: 'camera', stationId: null },
+  { id: 'vision-box-2', name: 'Vision Box #2', nameKo: 'Vision Box #2', icon: <Camera className="w-4 h-4" />, status: 'warning', type: 'camera', stationId: null },
+  { id: 'vision-box-3', name: 'Vision Box #3', nameKo: 'Vision Box #3', icon: <Camera className="w-4 h-4" />, status: 'offline', type: 'camera', stationId: null },
+  { id: 'atron-1', name: 'Atron H/W #1', nameKo: 'Atron H/W #1', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron', stationId: null },
+  { id: 'atron-2', name: 'Atron H/W #2', nameKo: 'Atron H/W #2', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron', stationId: null },
+  { id: 'atron-3', name: 'Atron H/W #3', nameKo: 'Atron H/W #3', icon: <Cpu className="w-4 h-4" />, status: 'online', type: 'atron', stationId: null },
+  { id: 'input-1', name: 'Input', nameKo: 'Input', icon: <Package className="w-4 h-4" />, status: 'online', type: 'input', stationId: null },
+  { id: 'output-1', name: 'Output', nameKo: 'Output', icon: <Zap className="w-4 h-4" />, status: 'online', type: 'output', stationId: null },
 ];
 
 // Custom node component with hover tooltip for processing stats
@@ -144,7 +144,7 @@ const CustomNode = ({ data, id }: { data: any, id: string }) => {
         {processingStats && (
           <div className={cn(
             "text-xs mt-1",
-            data.isServerData ? "text-muted-foreground" : "text-muted-foreground bg-muted/30 px-1 rounded"
+            !data.isServerData ? "text-muted-foreground bg-muted/30 px-1 rounded" : "text-muted-foreground"
           )}>
             {language === 'ko' ? `분당 ${processingStats.processingRate}개` : `${processingStats.processingRate}/min`}
           </div>
@@ -340,11 +340,12 @@ export const ProcessingLineFlow: React.FC<ProcessingLineFlowProps> = ({
         const visionBox = equipmentList.find(eq => eq.id === `vision-box-${hwIndex}`);
         const atron = equipmentList.find(eq => eq.id === `atron-${hwIndex}`);
         
-        if (visionBox && !equipment.find(eq => eq.id === visionBox.id)) {
+        // stationId의 끝자리 번호와 일치하는 장비만 추가
+        if (visionBox && !equipment.find(eq => eq.id === visionBox.id) && stationId.endsWith(hwIndex.toString())) {
           const status = getEquipmentStatus(stationId);
           equipment.push({ ...visionBox, stationId, status });
         }
-        if (atron && !equipment.find(eq => eq.id === atron.id)) {
+        if (atron && !equipment.find(eq => eq.id === atron.id) && stationId.endsWith(hwIndex.toString())) {
           const status = getEquipmentStatus(stationId);
           equipment.push({ ...atron, stationId, status });
         }
@@ -356,8 +357,13 @@ export const ProcessingLineFlow: React.FC<ProcessingLineFlowProps> = ({
         const visionBox = equipmentList.find(eq => eq.id === `vision-box-${index}`);
         const atron = equipmentList.find(eq => eq.id === `atron-${index}`);
         
-        if (visionBox) equipment.push({ ...visionBox, stationId });
-        if (atron) equipment.push({ ...atron, stationId });
+        // stationId의 끝자리 번호와 일치하는 장비만 추가
+        if (visionBox && stationId.endsWith(index.toString())) {
+          equipment.push({ ...visionBox, stationId });
+        }
+        if (atron && stationId.endsWith(index.toString())) {
+          equipment.push({ ...atron, stationId });
+        }
       });
     }
     
@@ -478,9 +484,13 @@ export const ProcessingLineFlow: React.FC<ProcessingLineFlowProps> = ({
     return equipment.map((eq, index) => {
       // Update equipment status based on server data
       let updatedStatus = eq.status;
-      if (eq.stationId && (hasRealData.alerts || hasRealData.operationState || hasRealData.machineHealth)) {
+      const hasServerDataForStatus = eq.stationId && (hasRealData.alerts || hasRealData.operationState || hasRealData.machineHealth);
+      if (hasServerDataForStatus) {
         updatedStatus = getEquipmentStatus(eq.stationId);
       }
+      
+      // Determine if we have any server data for this equipment (for styling)
+      const hasAnyServerData = hasRealData.objectLogs || hasRealData.alerts || hasRealData.operationState || hasRealData.machineHealth;
       
       return {
         id: eq.id,
@@ -490,7 +500,7 @@ export const ProcessingLineFlow: React.FC<ProcessingLineFlowProps> = ({
           label: (
             <div className={cn(
               "flex items-center space-x-2",
-              !hasRealData.objectLogs && "text-muted-foreground"
+              !hasAnyServerData && "text-muted-foreground"
             )}>
               {eq.icon}
               <span className="text-xs">{language === 'ko' ? eq.nameKo : eq.name}</span>
@@ -501,13 +511,13 @@ export const ProcessingLineFlow: React.FC<ProcessingLineFlowProps> = ({
           isServerData: hasRealData.objectLogs
         },
         style: {
-          background: !hasRealData.objectLogs
+          background: !hasAnyServerData
             ? (updatedStatus === 'online' ? '#f1f5f9' : updatedStatus === 'warning' ? '#f8fafc' : '#f1f5f9')
             : (updatedStatus === 'online' ? '#dcfce7' : updatedStatus === 'warning' ? '#fef3c7' : '#fee2e2'),
-          border: !hasRealData.objectLogs
+          border: !hasAnyServerData
             ? '1px solid #cbd5e1'
             : (updatedStatus === 'online' ? '1px solid #16a34a' : updatedStatus === 'warning' ? '1px solid #d97706' : '1px solid #dc2626'),
-          opacity: !hasRealData.objectLogs ? 0.7 : 1
+          opacity: !hasAnyServerData ? 0.7 : 1
         }
       };
     });
@@ -602,9 +612,13 @@ export const ProcessingLineFlow: React.FC<ProcessingLineFlowProps> = ({
                   {selectedEquipment.map((equipment) => {
                     // Update equipment status based on server data
                     let updatedStatus = equipment.status;
-                    if (equipment.stationId && (hasRealData.alerts || hasRealData.operationState || hasRealData.machineHealth)) {
+                    const hasServerDataForStatus = equipment.stationId && (hasRealData.alerts || hasRealData.operationState || hasRealData.machineHealth);
+                    if (hasServerDataForStatus) {
                       updatedStatus = getEquipmentStatus(equipment.stationId);
                     }
+                    
+                    // Determine if we have any server data for this equipment
+                    const hasAnyServerData = hasRealData.objectLogs || hasRealData.alerts || hasRealData.operationState || hasRealData.machineHealth;
                     
                     return (
                       <div
@@ -625,7 +639,7 @@ export const ProcessingLineFlow: React.FC<ProcessingLineFlowProps> = ({
                         </div>
                         <Badge variant={getStatusColor(updatedStatus)} className={cn(
                           "text-xs",
-                          !hasRealData.operationState && "bg-muted/50"
+                          !hasAnyServerData && "bg-muted/50"
                         )}>
                           {getStatusText(updatedStatus, language)}
                         </Badge>

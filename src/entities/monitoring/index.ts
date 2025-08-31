@@ -1,11 +1,15 @@
 export * from './types';
-export { monitoringService } from '../shared';
+export { monitoringService } from './service';
 
 export type {
-  ObjectLog,
-  SystemHealth,
-  Alert,
-  OperationState,
-  MachineHealth,
-  StationId,
+  GetObjectLogsParams,
+  GetObjectLogsResponse,
+  GetSystemHealthParams,
+  GetSystemHealthResponse,
+  GetAlertsParams,
+  GetAlertsResponse,
+  GetOperationStateParams,
+  GetOperationStateResponse,
+  GetMachineHealthParams,
+  GetMachineHealthResponse,
 } from './types';

@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { httpClient } from '@/entities/shared';
+import { httpClient } from '@/shared/api';
 import type {
   GetObjectLogsParams,
   GetObjectLogsResponse,

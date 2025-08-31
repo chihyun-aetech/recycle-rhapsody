@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { httpClient } from '@/entities/shared';
+import { httpClient } from '@/shared/api';
 
 export const systemApi = {
   // API 서버 상태 확인

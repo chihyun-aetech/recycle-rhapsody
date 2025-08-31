@@ -11,6 +11,14 @@ import { CalendarIcon, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import * as XLSX from 'xlsx';
+import { 
+  useGetPeriodStatistics, 
+  useGetDailyReports, 
+  useGetHourlyReports, 
+  useGetTodaySummary, 
+  useGetWeekSummary, 
+  useGetMonthSummary 
+} from '@/entities/stats/queries';
 
 // CSV 데이터 파싱 함수
 const parseCSVData = (csvContent: string) => {
@@ -394,7 +402,7 @@ const generatePeriodData = (startDate: Date, endDate: Date) => {
 };
 
 export const StatsTab: React.FC = () => {
-  const { language } = useDashboard();
+  const { language, selectedSite } = useDashboard();
   const [startDate, setStartDate] = useState<Date>(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)); // 2 weeks ago
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [isStartCalendarOpen, setIsStartCalendarOpen] = useState(false);
@@ -403,6 +411,107 @@ export const StatsTab: React.FC = () => {
   // 분단위 차트용 날짜 선택
   const [selectedMinuteDate, setSelectedMinuteDate] = useState<Date>(new Date());
   const [isMinuteDateCalendarOpen, setIsMinuteDateCalendarOpen] = useState(false);
+
+  // Generate station IDs for selected site (e.g., R&T1, R&T2, R&T3)
+  const stationIds = [`${selectedSite}1`, `${selectedSite}2`, `${selectedSite}3`];
+
+  // Server data queries
+  const { data: periodStatsData, isLoading: periodLoading, error: periodError } = useGetPeriodStatistics({
+    start_date: format(startDate, 'yyyy-MM-dd'),
+    end_date: format(endDate, 'yyyy-MM-dd'),
+    station_ids: stationIds
+  });
+
+  const { data: todayData, isLoading: todayLoading } = useGetTodaySummary({
+    station_ids: stationIds
+  });
+
+  const { data: weekData, isLoading: weekLoading } = useGetWeekSummary({
+    station_ids: stationIds
+  });
+
+  const { data: monthData, isLoading: monthLoading } = useGetMonthSummary({
+    station_ids: stationIds
+  });
+
+  const { data: dailyReportsData, isLoading: dailyLoading } = useGetDailyReports({
+    start_date: format(startDate, 'yyyy-MM-dd'),
+    end_date: format(endDate, 'yyyy-MM-dd'),
+    station_id: `${selectedSite}1` // Use primary station for daily reports
+  });
+
+  const { data: hourlyReportsData, isLoading: hourlyLoading } = useGetHourlyReports({
+    start_datetime: format(selectedMinuteDate, "yyyy-MM-dd'T'00:00:00"),
+    end_datetime: format(selectedMinuteDate, "yyyy-MM-dd'T'23:59:59"),
+    station_id: `${selectedSite}1` // Use primary station for hourly reports
+  });
+
+  const isLoading = periodLoading || todayLoading || weekLoading || monthLoading || dailyLoading || hourlyLoading;
+
+  // Show error toast notifications for failed queries
+  useEffect(() => {
+    if (periodError) {
+      toast.error(language === 'ko' ? '기간 통계 데이터를 불러올 수 없습니다.' : 'Failed to load period statistics data.');
+    }
+  }, [periodError, language]);
+
+  // Helper function to extract site from station_id
+  const extractSiteFromStationId = (stationId: string): string => {
+    return stationId.replace(/\d+$/, '');
+  };
+
+  // Filter server data by selected site
+  const filteredPeriodData = useMemo(() => {
+    if (!periodStatsData?.daily_trends || !Array.isArray(periodStatsData.daily_trends)) return [];
+    return periodStatsData.daily_trends.filter(item => 
+      !item.station_id || extractSiteFromStationId(item.station_id) === selectedSite
+    );
+  }, [periodStatsData, selectedSite]);
+
+  const filteredDailyData = useMemo(() => {
+    if (!dailyReportsData?.data || !Array.isArray(dailyReportsData.data)) return [];
+    return dailyReportsData.data.filter(item =>
+      !item.station_id || extractSiteFromStationId(item.station_id) === selectedSite
+    );
+  }, [dailyReportsData, selectedSite]);
+
+  const filteredHourlyData = useMemo(() => {
+    if (!hourlyReportsData?.data || !Array.isArray(hourlyReportsData.data)) return [];
+    return hourlyReportsData.data.filter(item =>
+      !item.station_id || extractSiteFromStationId(item.station_id) === selectedSite
+    );
+  }, [hourlyReportsData, selectedSite]);
+
+  // Process server data or fallback to mock data
+  const processedPeriodData = useMemo(() => {
+    if (filteredPeriodData.length > 0) {
+      return filteredPeriodData.map(item => ({
+        date: item.date || format(new Date(), 'yyyy-MM-dd'),
+        revenue: item.total_revenue || 0,
+        processing: item.total_processed || 0,
+        analysis: item.total_analyzed || 0,
+        wastePET: item.pet_count || 0,
+        wastePE: item.pe_count || 0,
+        wastePP: item.pp_count || 0,
+        wastePS: item.ps_count || 0,
+        wasteGlass: item.glass_count || 0,
+        wasteCan: item.can_count || 0,
+        wastePaper: item.paper_count || 0,
+        wasteOther: item.other_count || 0,
+        dailyInflow: item.total_inflow || 0,
+        r1Processed: item.r1_processed || 0,
+        r2Processed: item.r2_processed || 0,
+        r3Processed: item.r3_processed || 0,
+        unprocessed: item.total_unprocessed || 0,
+        averageArea: item.average_area || 0,
+        averageDepth: item.average_depth || 0,
+        pickupRate: item.pickup_rate || 0,
+        beltSpeed: item.belt_speed || 2.4,
+      }));
+    }
+    // Fallback to generated data
+    return generatePeriodData(startDate, endDate);
+  }, [filteredPeriodData, startDate, endDate]);
 
   // 기간이 변경될 때 선택된 날짜 조정
   useEffect(() => {
@@ -416,8 +525,6 @@ export const StatsTab: React.FC = () => {
       setSelectedMinuteDate(endDate);
     }
   }, [startDate, endDate]);
-
-  const periodData = useMemo(() => generatePeriodData(startDate, endDate), [startDate, endDate]);
   
   // 실제 CSV 데이터 분석 (기간과 무관하므로 한 번만 계산)
   const realCSVData = useMemo(() => generateRealCSVData(), []);
@@ -433,28 +540,28 @@ export const StatsTab: React.FC = () => {
   const COLORS = ['#00A788', '#3b82f6', '#22c55e', '#9333ea', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
   const exportToExcel = () => {
-    const exportData = periodData.map(item => ({
-      [language === 'ko' ? '날짜' : 'Date']: item.date,
-      [language === 'ko' ? '컨베이어 유입량' : 'Conveyor Inflow']: item.dailyInflow,
-      [language === 'ko' ? 'R1 처리량' : 'R1 Processed']: item.r1Processed,
-      [language === 'ko' ? 'R2 처리량' : 'R2 Processed']: item.r2Processed,
-      [language === 'ko' ? 'R3 처리량' : 'R3 Processed']: item.r3Processed,
-      [language === 'ko' ? '총 처리량' : 'Total Processing']: item.processing,
-      [language === 'ko' ? '미처리량' : 'Unprocessed']: item.unprocessed,
-      [language === 'ko' ? '총 수입 (원)' : 'Total Revenue (KRW)']: item.revenue,
-      [language === 'ko' ? '분석량 (건)' : 'Analysis (Cases)']: item.analysis,
-      [language === 'ko' ? 'PET 처리량' : 'PET Processing']: item.wastePET,
-      [language === 'ko' ? 'PE 처리량' : 'PE Processing']: item.wastePE,
-      [language === 'ko' ? 'PP 처리량' : 'PP Processing']: item.wastePP,
-      [language === 'ko' ? 'PS 처리량' : 'PS Processing']: item.wastePS,
-      [language === 'ko' ? 'Glass 처리량' : 'Glass Processing']: item.wasteGlass,
-      [language === 'ko' ? 'Can 처리량' : 'Can Processing']: item.wasteCan,
-      [language === 'ko' ? 'Paper 처리량' : 'Paper Processing']: item.wastePaper,
-      [language === 'ko' ? 'Other 처리량' : 'Other Processing']: item.wasteOther,
-      [language === 'ko' ? '평균 면적 (픽셀)' : 'Average Area (pixels)']: item.averageArea,
-      [language === 'ko' ? '평균 깊이 (mm)' : 'Average Depth (mm)']: item.averageDepth,
-      [language === 'ko' ? '벨트 속도 (m/s)' : 'Belt Speed (m/s)']: item.beltSpeed.toFixed(2),
-      [language === 'ko' ? '픽업률 (%)' : 'Pickup Rate (%)']: item.pickupRate.toFixed(2),
+    const exportData = (processedPeriodData || []).map(item => ({
+      [language === 'ko' ? '날짜' : 'Date']: item?.date || '',
+      [language === 'ko' ? '컨베이어 유입량' : 'Conveyor Inflow']: item?.dailyInflow || 0,
+      [language === 'ko' ? 'R1 처리량' : 'R1 Processed']: item?.r1Processed || 0,
+      [language === 'ko' ? 'R2 처리량' : 'R2 Processed']: item?.r2Processed || 0,
+      [language === 'ko' ? 'R3 처리량' : 'R3 Processed']: item?.r3Processed || 0,
+      [language === 'ko' ? '총 처리량' : 'Total Processing']: item?.processing || 0,
+      [language === 'ko' ? '미처리량' : 'Unprocessed']: item?.unprocessed || 0,
+      [language === 'ko' ? '총 수입 (원)' : 'Total Revenue (KRW)']: item?.revenue || 0,
+      [language === 'ko' ? '분석량 (건)' : 'Analysis (Cases)']: item?.analysis || 0,
+      [language === 'ko' ? 'PET 처리량' : 'PET Processing']: item?.wastePET || 0,
+      [language === 'ko' ? 'PE 처리량' : 'PE Processing']: item?.wastePE || 0,
+      [language === 'ko' ? 'PP 처리량' : 'PP Processing']: item?.wastePP || 0,
+      [language === 'ko' ? 'PS 처리량' : 'PS Processing']: item?.wastePS || 0,
+      [language === 'ko' ? 'Glass 처리량' : 'Glass Processing']: item?.wasteGlass || 0,
+      [language === 'ko' ? 'Can 처리량' : 'Can Processing']: item?.wasteCan || 0,
+      [language === 'ko' ? 'Paper 처리량' : 'Paper Processing']: item?.wastePaper || 0,
+      [language === 'ko' ? 'Other 처리량' : 'Other Processing']: item?.wasteOther || 0,
+      [language === 'ko' ? '평균 면적 (픽셀)' : 'Average Area (pixels)']: item?.averageArea || 0,
+      [language === 'ko' ? '평균 깊이 (mm)' : 'Average Depth (mm)']: item?.averageDepth || 0,
+      [language === 'ko' ? '벨트 속도 (m/s)' : 'Belt Speed (m/s)']: (item?.beltSpeed || 2.4).toFixed(2),
+      [language === 'ko' ? '픽업률 (%)' : 'Pickup Rate (%)']: (item?.pickupRate || 0).toFixed(2),
     }));
 
     const ws = XLSX.utils.json_to_sheet(exportData);
@@ -465,19 +572,25 @@ export const StatsTab: React.FC = () => {
     XLSX.writeFile(wb, filename);
   };
 
-  const totalRevenue = periodData.reduce((sum, item) => sum + item.revenue, 0);
-  const totalInflow = periodData.reduce((sum, item) => sum + item.dailyInflow, 0);
-  const totalProcessing = periodData.reduce((sum, item) => sum + item.processing, 0);
-  const totalAnalysis = periodData.reduce((sum, item) => sum + item.analysis, 0);
-  const totalUnprocessed = periodData.reduce((sum, item) => sum + item.unprocessed, 0);
-  const averagePickupRate = periodData.reduce((sum, item) => sum + item.pickupRate, 0) / periodData.length;
-  const averageObjectArea = periodData.reduce((sum, item) => sum + item.averageArea, 0) / periodData.length;
-  const averageBeltSpeed = periodData.reduce((sum, item) => sum + item.beltSpeed, 0) / periodData.length;
+  const totalRevenue = processedPeriodData?.reduce((sum, item) => sum + (item?.revenue || 0), 0) || 0;
+  const totalInflow = processedPeriodData?.reduce((sum, item) => sum + (item?.dailyInflow || 0), 0) || 0;
+  const totalProcessing = processedPeriodData?.reduce((sum, item) => sum + (item?.processing || 0), 0) || 0;
+  const totalAnalysis = processedPeriodData?.reduce((sum, item) => sum + (item?.analysis || 0), 0) || 0;
+  const totalUnprocessed = processedPeriodData?.reduce((sum, item) => sum + (item?.unprocessed || 0), 0) || 0;
+  const averagePickupRate = processedPeriodData?.length > 0 
+    ? processedPeriodData.reduce((sum, item) => sum + (item?.pickupRate || 0), 0) / processedPeriodData.length 
+    : 0;
+  const averageObjectArea = processedPeriodData?.length > 0 
+    ? processedPeriodData.reduce((sum, item) => sum + (item?.averageArea || 0), 0) / processedPeriodData.length 
+    : 0;
+  const averageBeltSpeed = processedPeriodData?.length > 0 
+    ? processedPeriodData.reduce((sum, item) => sum + (item?.beltSpeed || 0), 0) / processedPeriodData.length 
+    : 2.4;
 
   // 로봇별 처리량 합계
-  const totalR1 = periodData.reduce((sum, item) => sum + item.r1Processed, 0);
-  const totalR2 = periodData.reduce((sum, item) => sum + item.r2Processed, 0);
-  const totalR3 = periodData.reduce((sum, item) => sum + item.r3Processed, 0);
+  const totalR1 = processedPeriodData?.reduce((sum, item) => sum + (item?.r1Processed || 0), 0) || 0;
+  const totalR2 = processedPeriodData?.reduce((sum, item) => sum + (item?.r2Processed || 0), 0) || 0;
+  const totalR3 = processedPeriodData?.reduce((sum, item) => sum + (item?.r3Processed || 0), 0) || 0;
 
   return (
     <div className="p-6 space-y-6">
@@ -492,8 +605,46 @@ export const StatsTab: React.FC = () => {
           <div className="text-sm text-muted-foreground">
             {language === 'ko' ? '기간별 상세 분석' : 'Period Analysis'}
           </div>
+          <div className="flex items-center justify-end mt-1 space-x-2">
+            <div className={`w-2 h-2 rounded-full ${filteredPeriodData.length > 0 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+            <span className="text-xs text-muted-foreground">
+              {filteredPeriodData.length > 0 
+                ? (language === 'ko' ? '서버 데이터' : 'Server Data')
+                : (language === 'ko' ? '기본 데이터' : 'Fallback Data')
+              }
+            </span>
+          </div>
         </div>
       </div>
+
+      {/* Loading and Error States */}
+      {isLoading && (
+        <Card>
+          <CardContent>
+            <div className="flex items-center justify-center py-8">
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-muted-foreground">{language === 'ko' ? '데이터를 불러오는 중...' : 'Loading data...'}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {periodError && (
+        <Card>
+          <CardContent>
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <div className="text-red-600 mb-2">⚠️</div>
+                <div className="text-sm text-muted-foreground">
+                  {language === 'ko' ? '서버 데이터를 불러올 수 없어 기본 데이터를 표시합니다.' : 'Unable to load server data, showing fallback data.'}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Date Range Selector */}
       <Card>
@@ -609,7 +760,7 @@ export const StatsTab: React.FC = () => {
                 {(totalInflow / 1000).toFixed(0)}K
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                {language === 'ko' ? `일평균 ${Math.round(totalInflow / periodData.length / 1000)}K개` : `Avg ${Math.round(totalInflow / periodData.length / 1000)}K/day`}
+                {language === 'ko' ? `일평균 ${Math.round(totalInflow / Math.max(processedPeriodData?.length || 1, 1) / 1000)}K개` : `Avg ${Math.round(totalInflow / Math.max(processedPeriodData?.length || 1, 1) / 1000)}K/day`}
               </p>
             </CardContent>
           </Card>
@@ -742,7 +893,7 @@ export const StatsTab: React.FC = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={periodData}>
+              <LineChart data={processedPeriodData || []}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="date" className="fill-muted-foreground" tick={{ fontSize: 12 }} />
                 <YAxis className="fill-muted-foreground" tick={{ fontSize: 12 }} />
@@ -770,7 +921,7 @@ export const StatsTab: React.FC = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={periodData}>
+              <LineChart data={processedPeriodData || []}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="date" className="fill-muted-foreground" tick={{ fontSize: 12 }} />
                 <YAxis className="fill-muted-foreground" tick={{ fontSize: 12 }} />
@@ -816,7 +967,7 @@ export const StatsTab: React.FC = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={periodData}>
+              <LineChart data={processedPeriodData || []}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="date" className="fill-muted-foreground" tick={{ fontSize: 12 }} />
                 <YAxis className="fill-muted-foreground" tick={{ fontSize: 12 }} />
@@ -1196,26 +1347,26 @@ export const StatsTab: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {periodData.map((item, index) => (
+                {(processedPeriodData || []).map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium">{item.date}</TableCell>
-                    <TableCell>{item.dailyInflow.toLocaleString()}</TableCell>
-                    <TableCell className="text-blue-600 font-semibold">{item.r1Processed.toLocaleString()}</TableCell>
-                    <TableCell className="text-green-600 font-semibold">{item.r2Processed.toLocaleString()}</TableCell>
-                    <TableCell className="text-purple-600 font-semibold">{item.r3Processed.toLocaleString()}</TableCell>
-                    <TableCell className="font-semibold">{item.processing.toLocaleString()}</TableCell>
-                    <TableCell className="text-red-600">{item.unprocessed.toLocaleString()}</TableCell>
-                    <TableCell>₩{Math.round(item.revenue / 1000)}K</TableCell>
-                    <TableCell>{item.pickupRate.toFixed(2)}%</TableCell>
-                    <TableCell>{item.beltSpeed.toFixed(2)} m/s</TableCell>
-                    <TableCell>{item.wastePET.toLocaleString()}</TableCell>
-                    <TableCell>{item.wastePE.toLocaleString()}</TableCell>
-                    <TableCell>{item.wastePP.toLocaleString()}</TableCell>
-                    <TableCell>{item.wastePS.toLocaleString()}</TableCell>
-                    <TableCell>{item.wasteGlass.toLocaleString()}</TableCell>
-                    <TableCell>{item.wasteCan.toLocaleString()}</TableCell>
-                    <TableCell>{item.wastePaper.toLocaleString()}</TableCell>
-                    <TableCell>{item.wasteOther.toLocaleString()}</TableCell>
+                    <TableCell className="font-medium">{item?.date || ''}</TableCell>
+                    <TableCell>{(item?.dailyInflow || 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-blue-600 font-semibold">{(item?.r1Processed || 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-green-600 font-semibold">{(item?.r2Processed || 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-purple-600 font-semibold">{(item?.r3Processed || 0).toLocaleString()}</TableCell>
+                    <TableCell className="font-semibold">{(item?.processing || 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-red-600">{(item?.unprocessed || 0).toLocaleString()}</TableCell>
+                    <TableCell>₩{Math.round((item?.revenue || 0) / 1000)}K</TableCell>
+                    <TableCell>{(item?.pickupRate || 0).toFixed(2)}%</TableCell>
+                    <TableCell>{(item?.beltSpeed || 2.4).toFixed(2)} m/s</TableCell>
+                    <TableCell>{(item?.wastePET || 0).toLocaleString()}</TableCell>
+                    <TableCell>{(item?.wastePE || 0).toLocaleString()}</TableCell>
+                    <TableCell>{(item?.wastePP || 0).toLocaleString()}</TableCell>
+                    <TableCell>{(item?.wastePS || 0).toLocaleString()}</TableCell>
+                    <TableCell>{(item?.wasteGlass || 0).toLocaleString()}</TableCell>
+                    <TableCell>{(item?.wasteCan || 0).toLocaleString()}</TableCell>
+                    <TableCell>{(item?.wastePaper || 0).toLocaleString()}</TableCell>
+                    <TableCell>{(item?.wasteOther || 0).toLocaleString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

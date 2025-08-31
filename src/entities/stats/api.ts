@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { BaseResponse, httpClient } from '@/entities/shared';
+import { BaseResponse, httpClient } from '@/shared/api';
 import type {
   GetPeriodStatisticsParams,
   GetPeriodStatisticsResponse,
