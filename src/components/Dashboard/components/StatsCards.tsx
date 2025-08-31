@@ -1,6 +1,6 @@
 import React from 'react';
 import { TrendingUp, DollarSign, BarChart3, Clock } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/shared/ui/card';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '../DashboardLayout';
 

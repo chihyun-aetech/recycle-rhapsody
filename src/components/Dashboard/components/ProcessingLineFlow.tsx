@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Badge } from '@/shared/ui/badge';
+import { ScrollArea } from '@/shared/ui/scroll-area';
 import { Camera, Package, Cpu, Zap } from 'lucide-react';
 import { useDashboard } from '../DashboardLayout';
 import { cn } from '@/lib/utils';

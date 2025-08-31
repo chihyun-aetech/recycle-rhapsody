@@ -7,9 +7,9 @@ import { StatsTab } from './tabs/StatsTab';
 import { AdminTab } from './tabs/AdminTab';
 import { Sun, Moon, Globe, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/shared/ui/button';
+import { Switch } from '@/shared/ui/switch';
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 
 type Tab = 'overview' | 'monitoring' | 'stats' | 'admin';
 type FontSize = 'small' | 'medium' | 'large';

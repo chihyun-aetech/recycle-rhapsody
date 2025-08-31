@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/shared/hooks/use-toast';
 
 export interface User {
   serialnumber: number;
