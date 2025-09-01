@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/shared/ui/card';
-import { Badge } from '@/shared/ui/badge';
-import { Button } from '@/shared/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
-import { Cpu, Camera, Activity, Gauge, HardDrive, MemoryStick } from 'lucide-react';
+import { Card, CardContent, Badge, Button, Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui';
+import { Cpu, Camera, Gauge } from 'lucide-react';
 import { useDashboard } from '../DashboardLayout';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 
 const CircularProgress: React.FC<{

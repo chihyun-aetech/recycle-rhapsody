@@ -1,5 +1,5 @@
 import React, { useState, createContext, useContext, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import { Navigation } from './Navigation';
 import { OverviewTab } from './tabs/OverviewTab';
 import { MonitoringTab } from './tabs/MonitoringTab';
@@ -7,9 +7,7 @@ import { StatsTab } from './tabs/StatsTab';
 import { AdminTab } from './tabs/AdminTab';
 import { Sun, Moon, Globe, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/shared/ui/button';
-import { Switch } from '@/shared/ui/switch';
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
+import { Button, Switch, Popover, PopoverContent, PopoverTrigger } from '@/shared/ui';
 
 type Tab = 'overview' | 'monitoring' | 'stats' | 'admin';
 type FontSize = 'small' | 'medium' | 'large';

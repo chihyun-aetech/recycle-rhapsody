@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Badge } from '@/shared/ui/badge';
-import { cn } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle, Badge } from '@/shared/ui';
+import { cn } from '@/shared/lib/utils';
 import { useDashboard } from '../DashboardLayout';
 
 type WasteType = 'PET' | 'PE' | 'PP' | 'PS' | 'Other' | 'Glass' | 'Can' | 'Paper' | 'Plastic Film' | 'Else' | 'Hole' | 'Object';

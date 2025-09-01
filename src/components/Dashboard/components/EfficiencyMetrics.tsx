@@ -1,7 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Progress } from '@/shared/ui/progress';
-import { Badge } from '@/shared/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, Progress, Badge } from '@/shared/ui';
 import { useDashboard } from '../DashboardLayout';
 
 const efficiencyData = [

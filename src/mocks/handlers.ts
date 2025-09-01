@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { userDatabase, User } from '@/lib/database';
+import { userDatabase, User } from '@/shared/lib/database';
 
 export const handlers = [
   // Login endpoint

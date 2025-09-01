@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { Bell, Sun, Moon, Globe, Type, Settings, ChevronDown, MapPin } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/shared/ui/button';
-import { Switch } from '@/shared/ui/switch';
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
+import { cn } from '@/shared/lib/utils';
+import { Button, Switch, Popover, PopoverContent, PopoverTrigger } from '@/shared/ui';
 import { useDashboard } from './DashboardLayout';
 import { AlertDropdown } from './AlertDropdown';
 import { UserDropdown } from './UserDropdown';

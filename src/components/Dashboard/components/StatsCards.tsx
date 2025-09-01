@@ -1,7 +1,7 @@
 import React from 'react';
 import { TrendingUp, DollarSign, BarChart3, Clock } from 'lucide-react';
-import { Card, CardContent } from '@/shared/ui/card';
-import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/shared/ui';
+import { cn } from '@/shared/lib/utils';
 import { useDashboard } from '../DashboardLayout';
 
 const statsData = {

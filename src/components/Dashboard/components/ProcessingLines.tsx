@@ -1,8 +1,6 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Badge } from '@/shared/ui/badge';
-import { Progress } from '@/shared/ui/progress';
-import { cn } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle, Badge, Progress } from '@/shared/ui';
+import { cn } from '@/shared/lib/utils';
 import { useDashboard } from '../DashboardLayout';
 
 const lineData = [

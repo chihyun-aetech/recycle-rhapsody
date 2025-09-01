@@ -1,14 +1,14 @@
 import React from 'react';
 import { Bell, AlertTriangle, Info, AlertCircle } from 'lucide-react';
-import { Button } from '@/shared/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/shared/ui/dropdown-menu';
-import { Badge } from '@/shared/ui/badge';
+  Button,
+  Badge
+} from '@/shared/ui';
 import { useDashboard } from './DashboardLayout';
 
 const alertData = [

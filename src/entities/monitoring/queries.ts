@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { QUERY_KEYS } from '@/lib/tanstack-query';
+import { QUERY_KEYS } from '@/shared/lib/tanstack-query';
 import { monitoringService } from './service';
 import type {
   GetObjectLogsParams,

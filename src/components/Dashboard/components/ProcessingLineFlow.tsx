@@ -1,10 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Badge } from '@/shared/ui/badge';
-import { ScrollArea } from '@/shared/ui/scroll-area';
+import { Card, CardContent, CardHeader, CardTitle, Badge, ScrollArea } from '@/shared/ui';
 import { Camera, Package, Cpu, Zap } from 'lucide-react';
 import { useDashboard } from '../DashboardLayout';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import { createPortal } from 'react-dom';
 import {
   ReactFlow,

@@ -23,59 +23,92 @@ export const MonitoringTab: React.FC = () => {
   // Generate station IDs for selected site (e.g., R&T1, R&T2, R&T3)
   const stationIds = [`${selectedSite}1`, `${selectedSite}2`, `${selectedSite}3`];
   
-  // Fetch all monitoring data with specific station_ids
-  const { data: objectLogsData, isLoading: objectLogsLoading } = useObjectLogs({ station_ids: stationIds });
-  const { data: systemHealthData, isLoading: systemHealthLoading } = useSystemHealth({ station_ids: stationIds });
-  const { data: alertsData, isLoading: alertsLoading } = useAlerts({ station_ids: stationIds });
-  const { data: operationStateData, isLoading: operationStateLoading } = useOperationState({ station_ids: stationIds });
-  const { data: machineHealthData, isLoading: machineHealthLoading } = useMachineHealth({ station_ids: stationIds });
+  // Fetch monitoring data for each station ID
+  const stationQueries = stationIds.map(stationId => ({
+    objectLogs: useObjectLogs({ station_id: stationId }),
+    systemHealth: useSystemHealth({ station_id: stationId }),
+    alerts: useAlerts({ station_id: stationId }),
+    operationState: useOperationState({ station_id: stationId }),
+    machineHealth: useMachineHealth({ station_id: stationId })
+  }));
+
+  // Combine data from all stations
+  const objectLogsData = stationQueries[0]?.objectLogs.data ? {
+    ...stationQueries[0].objectLogs.data,
+    data: stationQueries.flatMap(q => q.objectLogs.data?.data || [])
+  } : undefined;
+  const systemHealthData = stationQueries[0]?.systemHealth.data ? {
+    ...stationQueries[0].systemHealth.data,
+    data: stationQueries.flatMap(q => q.systemHealth.data?.data || [])
+  } : undefined;
+  const alertsData = stationQueries[0]?.alerts.data ? {
+    ...stationQueries[0].alerts.data,
+    data: stationQueries.flatMap(q => q.alerts.data?.data || [])
+  } : undefined;
+  const operationStateData = stationQueries[0]?.operationState.data ? {
+    ...stationQueries[0].operationState.data,
+    data: stationQueries.flatMap(q => q.operationState.data?.data || [])
+  } : undefined;
+  const machineHealthData = stationQueries[0]?.machineHealth.data ? {
+    ...stationQueries[0].machineHealth.data,
+    data: stationQueries.flatMap(q => q.machineHealth.data?.data || [])
+  } : undefined;
+
+  // Check if any query is loading
+  const isLoading = stationQueries.some(q => 
+    q.objectLogs.isLoading || 
+    q.systemHealth.isLoading || 
+    q.alerts.isLoading || 
+    q.operationState.isLoading || 
+    q.machineHealth.isLoading
+  );
   
   // Filter data by selected site
   const filteredObjectLogsData = objectLogsData ? {
     ...objectLogsData,
-    results: objectLogsData.results?.filter(log => 
+    data: objectLogsData.data?.filter(log => 
       extractSiteFromStationId(log.station_id) === selectedSite
     ) || []
   } : undefined;
   
   const filteredSystemHealthData = systemHealthData ? {
     ...systemHealthData,
-    results: systemHealthData.results?.filter(system => 
+    data: systemHealthData.data?.filter(system => 
       extractSiteFromStationId(system.station_id) === selectedSite
     ) || []
   } : undefined;
   
   const filteredAlertsData = alertsData ? {
     ...alertsData,
-    results: alertsData.results?.filter(alert => 
+    data: alertsData.data?.filter(alert => 
       extractSiteFromStationId(alert.station_id) === selectedSite
     ) || []
   } : undefined;
   
   const filteredOperationStateData = operationStateData ? {
     ...operationStateData,
-    results: operationStateData.results?.filter(operation => 
+    data: operationStateData.data?.filter(operation => 
       extractSiteFromStationId(operation.station_id) === selectedSite
     ) || []
   } : undefined;
   
   const filteredMachineHealthData = machineHealthData ? {
     ...machineHealthData,
-    results: machineHealthData.results?.filter(machine => 
+    data: machineHealthData.data?.filter(machine => 
       extractSiteFromStationId(machine.station_id) === selectedSite
     ) || []
   } : undefined;
 
   // Determine if we have real server data or need to show fallback data (based on filtered data)
   const hasRealData = {
-    objectLogs: !!(filteredObjectLogsData?.results?.length),
-    systemHealth: !!(filteredSystemHealthData?.results?.length),
-    alerts: !!(filteredAlertsData?.results?.length),
-    operationState: !!(filteredOperationStateData?.results?.length),
-    machineHealth: !!(filteredMachineHealthData?.results?.length)
+    objectLogs: !!(filteredObjectLogsData?.data?.length),
+    systemHealth: !!(filteredSystemHealthData?.data?.length),
+    alerts: !!(filteredAlertsData?.data?.length),
+    operationState: !!(filteredOperationStateData?.data?.length),
+    machineHealth: !!(filteredMachineHealthData?.data?.length)
   };
 
-  const isLoading = objectLogsLoading || systemHealthLoading || alertsLoading || operationStateLoading || machineHealthLoading;
+
 
   return (
     <div className="p-6 space-y-6">

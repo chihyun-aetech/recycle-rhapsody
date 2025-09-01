@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
-import { Label } from '@/shared/ui/label';
-import { Card, CardContent, CardHeader } from '@/shared/ui/card';
-import { Checkbox } from '@/shared/ui/checkbox';
+import { Button, Input, Label, Card, CardContent, CardHeader, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui';
 import { Eye, EyeOff } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
