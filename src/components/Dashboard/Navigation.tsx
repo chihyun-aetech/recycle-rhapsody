@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAtom } from 'jotai';
 import { Bell, Sun, Moon, Globe, Type, Settings, ChevronDown, MapPin } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { Button, Switch, Popover, PopoverContent, PopoverTrigger } from '@/shared/ui';
@@ -7,13 +8,20 @@ import { AlertDropdown } from './AlertDropdown';
 import { UserDropdown } from './UserDropdown';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { themeAtom, fontSizeAtom, languageAtom, selectedSiteAtom } from '@/shared/store/dashboardStore';
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  // Try to use Dashboard context, fallback to local state if not available
+  // Use global jotai atoms directly
+  const [theme, setTheme] = useAtom(themeAtom);
+  const [fontSize, setFontSize] = useAtom(fontSizeAtom);
+  const [language, setLanguage] = useAtom(languageAtom);
+  const [selectedSite, setSelectedSite] = useAtom(selectedSiteAtom);
+  
+  // Try to use Dashboard context for activeTab
   let dashboardContext;
   try {
     dashboardContext = useDashboard();
@@ -21,43 +29,11 @@ export const Navigation: React.FC = () => {
     dashboardContext = null;
   }
 
-  // Local state for standalone usage (like in AdminPage)
-  const [localTheme, setLocalTheme] = useState<'light' | 'dark'>('light');
-  const [localLanguage, setLocalLanguage] = useState<'ko' | 'en'>('ko');
-  const [localFontSize, setLocalFontSize] = useState<'small' | 'medium' | 'large'>('small');
+  // Local state for activeTab when no dashboard context
   const [localActiveTab, setLocalActiveTab] = useState<'overview' | 'monitoring' | 'stats' | 'admin'>('overview');
-
-  // Use dashboard context if available, otherwise use local state
   const activeTab = dashboardContext?.activeTab || localActiveTab;
   const setActiveTab = dashboardContext?.setActiveTab || setLocalActiveTab;
-  const fontSize = dashboardContext?.fontSize || localFontSize;
-  const setFontSize = dashboardContext?.setFontSize || setLocalFontSize;
-  const theme = dashboardContext?.theme || localTheme;
-  const setTheme = dashboardContext?.setTheme || setLocalTheme;
-  const language = dashboardContext?.language || localLanguage;
-  const setLanguage = dashboardContext?.setLanguage || setLocalLanguage;
-  const selectedSite = dashboardContext?.selectedSite || 'R&T';
-  const setSelectedSite = dashboardContext?.setSelectedSite || (() => {});
 
-  // Apply theme and font size when using local state
-  React.useEffect(() => {
-    if (!dashboardContext) {
-      const root = document.documentElement;
-      if (theme === 'dark') {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
-    }
-  }, [theme, dashboardContext]);
-
-  React.useEffect(() => {
-    if (!dashboardContext) {
-      const root = document.documentElement;
-      root.classList.remove('font-size-small', 'font-size-medium', 'font-size-large');
-      root.classList.add(`font-size-${fontSize}`);
-    }
-  }, [fontSize, dashboardContext]);
 
   const handleTitleClick = () => {
     navigate('/');

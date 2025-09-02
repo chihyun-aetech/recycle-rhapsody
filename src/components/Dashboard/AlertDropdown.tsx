@@ -9,7 +9,8 @@ import {
   Button,
   Badge
 } from '@/shared/ui';
-import { useDashboard } from './DashboardLayout';
+import { useAtom } from 'jotai';
+import { languageAtom } from '@/shared/store/dashboardStore';
 
 const alertData = [
   {
@@ -36,7 +37,7 @@ const alertData = [
 ];
 
 export const AlertDropdown: React.FC = () => {
-  const { language } = useDashboard();
+  const [language] = useAtom(languageAtom);
   
   const getAlertIcon = (severity: string) => {
     switch (severity) {

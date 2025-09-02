@@ -1,4 +1,5 @@
 import React, { useState, createContext, useContext, useEffect } from 'react';
+import { useAtom } from 'jotai';
 import { cn } from '@/shared/lib/utils';
 import { Navigation } from './Navigation';
 import { OverviewTab } from './tabs/OverviewTab';
@@ -8,27 +9,17 @@ import { AdminTab } from './tabs/AdminTab';
 import { Sun, Moon, Globe, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button, Switch, Popover, PopoverContent, PopoverTrigger } from '@/shared/ui';
+import { themeAtom, fontSizeAtom, languageAtom, selectedSiteAtom, Theme, FontSize, Language } from '@/shared/store/dashboardStore';
 
 type Tab = 'overview' | 'monitoring' | 'stats' | 'admin';
-type FontSize = 'small' | 'medium' | 'large';
-type Theme = 'light' | 'dark';
-type Language = 'ko' | 'en';
 
 interface DashboardContextType {
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
-  fontSize: FontSize;
-  setFontSize: (size: FontSize) => void;
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-  language: Language;
-  setLanguage: (lang: Language) => void;
   expandedCard: string | null;
   setExpandedCard: (cardId: string | null) => void;
   selectedLine: number | null;
   setSelectedLine: (lineId: number | null) => void;
-  selectedSite: string;
-  setSelectedSite: (site: string) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | null>(null);
@@ -44,12 +35,12 @@ export const useDashboard = () => {
 export const DashboardLayout: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
-  const [fontSize, setFontSize] = useState<FontSize>('small');
-  const [theme, setTheme] = useState<Theme>('light');
-  const [language, setLanguage] = useState<Language>('ko');
+  const [fontSize, setFontSize] = useAtom(fontSizeAtom);
+  const [theme, setTheme] = useAtom(themeAtom);
+  const [language, setLanguage] = useAtom(languageAtom);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [selectedLine, setSelectedLine] = useState<number | null>(null);
-  const [selectedSite, setSelectedSite] = useState<string>('R&T');
+  const [selectedSite, setSelectedSite] = useAtom(selectedSiteAtom);
 
   useEffect(() => {
     if (user?.level === 'admin') {
@@ -60,18 +51,10 @@ export const DashboardLayout: React.FC = () => {
   const contextValue: DashboardContextType = {
     activeTab,
     setActiveTab,
-    fontSize,
-    setFontSize,
-    theme,
-    setTheme,
-    language,
-    setLanguage,
     expandedCard,
     setExpandedCard,
     selectedLine,
     setSelectedLine,
-    selectedSite,
-    setSelectedSite,
   };
 
   const fontSizeClasses = {
