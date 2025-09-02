@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Progress } from '@/shared/ui';
 import { cn } from '@/shared/lib/utils';
-import { useDashboard } from '../DashboardLayout';
+import { languageAtom } from '@/shared/store/dashboardStore';
+import { useAtom } from 'jotai';
 
 const lineData = [
   { id: 1, name: 'Line 1', capacity: 1200, status: 'Active', efficiency: 92 },
@@ -10,7 +11,8 @@ const lineData = [
 ];
 
 export const ProcessingLines: React.FC = () => {
-  const { language, selectedLine, setSelectedLine } = useDashboard();
+  const [language] = useAtom(languageAtom);
+  const [selectedLine, setSelectedLine] = useState<number | null>(null);
 
   const getStatusColor = (status: string) => {
     switch (status) {

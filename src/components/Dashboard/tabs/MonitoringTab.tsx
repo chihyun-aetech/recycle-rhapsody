@@ -1,8 +1,8 @@
 import React from 'react';
-import { useDashboard } from '../DashboardLayout';
 import { StatusBar } from '../components/StatusBar';
 import { ProcessingLineFlow } from '../components/ProcessingLineFlow';
 import { SystemLogs } from '../components/SystemLogs';
+import { CameraStream } from '../components/CameraStream';
 import { 
   useObjectLogs, 
   useSystemHealth, 
@@ -10,9 +10,12 @@ import {
   useOperationState, 
   useMachineHealth 
 } from '@/entities/monitoring/queries';
+import { useAtom } from 'jotai';
+import { languageAtom, selectedSiteAtom } from '@/shared/store/dashboardStore';
 
 export const MonitoringTab: React.FC = () => {
-  const { language, selectedSite } = useDashboard();
+  const [language] = useAtom(languageAtom);
+  const [selectedSite] = useAtom(selectedSiteAtom);
   
   // Helper function to extract site from station_id
   const extractSiteFromStationId = (stationId: string): string => {
@@ -139,6 +142,15 @@ export const MonitoringTab: React.FC = () => {
         hasRealData={hasRealData}
         selectedSite={selectedSite}
       />
+
+      {/* Camera Monitoring Section */}
+      {/* 임시로 주석 */}
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CameraStream
+          cameraId="sungnam-atronc-3"
+          cameraName="성남_AtronC_3호기"
+        />
+      </div> */}
 
       {/* System Logs - Pass filtered server data and hasRealData flags */}
       <SystemLogs 

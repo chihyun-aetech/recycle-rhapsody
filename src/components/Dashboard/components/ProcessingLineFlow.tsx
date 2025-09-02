@@ -18,6 +18,8 @@ import {
   Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { useAtom } from 'jotai';
+import { languageAtom } from '@/shared/store/dashboardStore';
 
 // Force cache refresh - removed Settings icon dependency
 
@@ -259,7 +261,7 @@ export const ProcessingLineFlow: React.FC<ProcessingLineFlowProps> = ({
   hasRealData,
   selectedSite
 }) => {
-  const { language } = useDashboard();
+  const [language] = useAtom(languageAtom);
   
   // Helper function to extract H/W index from station_id
   const extractHwIndexFromStationId = (stationId: string): number => {

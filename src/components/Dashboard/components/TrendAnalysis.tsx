@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useDashboard } from '../DashboardLayout';
+import { useAtom } from 'jotai';
+import { languageAtom } from '@/shared/store/dashboardStore';
 
 const trendData = [
   { week: 'Week 1', throughput: 2500, efficiency: 85, errors: 12 },
@@ -36,7 +38,7 @@ const kpiTrends = [
 ];
 
 export const TrendAnalysis: React.FC = () => {
-  const { language } = useDashboard();
+  const [language] = useAtom(languageAtom);
 
   return (
     <div className="space-y-6">

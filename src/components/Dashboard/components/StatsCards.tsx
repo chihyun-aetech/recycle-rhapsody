@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TrendingUp, DollarSign, BarChart3, Clock } from 'lucide-react';
 import { Card, CardContent } from '@/shared/ui';
 import { cn } from '@/shared/lib/utils';
 import { useDashboard } from '../DashboardLayout';
+import { languageAtom } from '@/shared/store/dashboardStore';
+import { useAtom } from 'jotai';
 
 const statsData = {
   throughput: {
@@ -40,7 +42,8 @@ const statsData = {
 };
 
 export const StatsCards: React.FC = () => {
-  const { language, expandedCard, setExpandedCard } = useDashboard();
+  const [language] = useAtom(languageAtom);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   const getCardTitle = (key: string) => {
     const titles = {

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { useDashboard } from '../DashboardLayout';
+import { languageAtom } from '@/shared/store/dashboardStore';
+import { useAtom } from 'jotai';
 
 const wasteData = [
   { name: 'PET', value: 28, color: '#3b82f6' },
@@ -15,7 +16,7 @@ const wasteData = [
 ];
 
 export const WasteDistribution: React.FC = () => {
-  const { language } = useDashboard();
+  const [language] = useAtom(languageAtom);
 
   return (
     <Card>

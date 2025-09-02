@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge } from '@/shared/ui';
 import { cn } from '@/shared/lib/utils';
+import { languageAtom } from '@/shared/store/dashboardStore';
+import { useAtom } from 'jotai';
 import { useDashboard } from '../DashboardLayout';
 
 type WasteType = 'PET' | 'PE' | 'PP' | 'PS' | 'Other' | 'Glass' | 'Can' | 'Paper' | 'Plastic Film' | 'Else' | 'Hole' | 'Object';
@@ -35,7 +37,8 @@ const robotPositions = [
 ];
 
 export const ConveyorSystem: React.FC = () => {
-  const { language, selectedLine } = useDashboard();
+  const [language] = useAtom(languageAtom);
+  const { selectedLine } = useDashboard();
   const [wasteItems, setWasteItems] = useState<WasteItem[]>([]);
   const [activeRobot, setActiveRobot] = useState<string | null>(null);
 

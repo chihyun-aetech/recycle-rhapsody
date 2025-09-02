@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge } from '@/shared/ui';
 import { Camera, Cpu, Thermometer, Activity } from 'lucide-react';
-import { useDashboard } from '../DashboardLayout';
+import { useAtom } from 'jotai';
+import { languageAtom } from '@/shared/store/dashboardStore';
 
 const sensorData = [
   { 
@@ -35,7 +36,7 @@ const sensorData = [
 ];
 
 export const VisionBox: React.FC = () => {
-  const { language } = useDashboard();
+  const [language] = useAtom(languageAtom);
 
   const getStatusColor = (status: string) => {
     switch (status) {

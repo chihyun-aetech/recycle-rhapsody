@@ -1,0 +1,13 @@
+services:
+  rtsp-simple-server:
+    image: bluenviron/mediamtx:latest
+    container_name: rtsp-simple-server
+    ports:
+      - "8888:8888"  # HLS 포트
+      - "8554:8554"  # RTSP 포트
+      - "8889:8889"  # WebRTC 포트
+    extra_hosts:
+      - "camera:192.168.0.188"  # 남구로_AtronE_1호 카메라 호스트 매핑
+    volumes:
+      - ./rtsp-config/mediamtx-simple.yml:/mediamtx.yml
+    restart: unless-stopped

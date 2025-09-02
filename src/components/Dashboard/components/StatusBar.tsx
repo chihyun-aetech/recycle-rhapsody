@@ -3,6 +3,8 @@ import { Card, CardContent, Badge, Button, Dialog, DialogContent, DialogHeader, 
 import { Cpu, Camera, Gauge } from 'lucide-react';
 import { useDashboard } from '../DashboardLayout';
 import { cn } from '@/shared/lib/utils';
+import { useAtom } from 'jotai';
+import { languageAtom } from '@/shared/store/dashboardStore';
 
 
 const CircularProgress: React.FC<{
@@ -64,7 +66,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   hasRealData,
   selectedSite
 }) => {
-  const { language } = useDashboard();
+  const [language] = useAtom(languageAtom);
   const [selectedDetail, setSelectedDetail] = useState<string | null>(null);
 
   const getStatusColor = (status: string) => {

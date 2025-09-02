@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Progress, Badge } from '@/shared/ui';
 import { useDashboard } from '../DashboardLayout';
+import { languageAtom } from '@/shared/store/dashboardStore';
+import { useAtom } from 'jotai';
 
 const efficiencyData = [
   {
@@ -48,7 +50,7 @@ const efficiencyData = [
 ];
 
 export const EfficiencyMetrics: React.FC = () => {
-  const { language } = useDashboard();
+  const [language] = useAtom(languageAtom);
 
   const getStatusColor = (status: string) => {
     switch (status) {

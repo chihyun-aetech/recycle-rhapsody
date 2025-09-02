@@ -1,0 +1,52 @@
+# MediaMTX 설정 파일
+
+# 로깅 설정
+logLevel: info
+logDestinations: [stdout]
+
+# HLS 설정
+hls: yes
+hlsAddress: :8888
+hlsEncryption: no
+hlsAllowOrigin: "*"
+hlsSegmentCount: 3
+hlsSegmentDuration: 1s
+hlsPartDuration: 200ms
+
+# WebRTC 설정  
+webrtc: yes
+webrtcAddress: :8889
+webrtcAllowOrigin: "*"
+
+# RTSP 설정
+rtsp: yes
+rtspAddress: :8554
+
+# 경로 설정
+paths:
+  # VIGI C540 카메라 - 다양한 RTSP 경로 시도
+  camera1:
+    source: rtsp://admin:Aetech1324!@192.168.0.2:554/stream1
+    sourceOnDemand: yes
+    sourceOnDemandStartTimeout: 30s
+    sourceOnDemandCloseAfter: 60s
+    
+  camera1_alt:
+    source: rtsp://admin:Aetech1324!@192.168.0.2:554/stream2
+    sourceOnDemand: yes
+    sourceOnDemandStartTimeout: 30s
+    
+  camera1_h264:
+    source: rtsp://admin:Aetech1324!@192.168.0.2:554/h264Preview_01_main
+    sourceOnDemand: yes
+    sourceOnDemandStartTimeout: 30s
+    
+  camera1_ch1:
+    source: rtsp://admin:Aetech1324!@192.168.0.2:554/ch1-s1
+    sourceOnDemand: yes
+    sourceOnDemandStartTimeout: 30s
+    
+  camera1_simple:
+    source: rtsp://admin:Aetech1324!@192.168.0.2:554/live
+    sourceOnDemand: yes
+    sourceOnDemandStartTimeout: 30s

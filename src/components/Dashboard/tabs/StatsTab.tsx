@@ -15,6 +15,8 @@ import {
   useGetWeekSummary, 
   useGetMonthSummary 
 } from '@/entities/stats/queries';
+import { useAtom } from 'jotai';
+import { languageAtom, selectedSiteAtom } from '@/shared/store/dashboardStore';
 
 // CSV 데이터 파싱 함수
 const parseCSVData = (csvContent: string) => {
@@ -398,7 +400,8 @@ const generatePeriodData = (startDate: Date, endDate: Date) => {
 };
 
 export const StatsTab: React.FC = () => {
-  const { language, selectedSite } = useDashboard();
+  const [language] = useAtom(languageAtom);
+  const [selectedSite] = useAtom(selectedSiteAtom);
   const [startDate, setStartDate] = useState<Date>(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)); // 2 weeks ago
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [isStartCalendarOpen, setIsStartCalendarOpen] = useState(false);

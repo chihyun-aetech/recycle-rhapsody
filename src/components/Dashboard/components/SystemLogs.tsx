@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui';
 import { useDashboard } from '../DashboardLayout';
 import { cn } from '@/shared/lib/utils';
+import { useAtom } from 'jotai';
+import { languageAtom } from '@/shared/store/dashboardStore';
 
 
 interface SystemLogsProps {
@@ -24,7 +26,7 @@ export const SystemLogs: React.FC<SystemLogsProps> = ({
   hasRealData,
   selectedSite
 }) => {
-  const { language } = useDashboard();
+  const [language] = useAtom(languageAtom);
   const [focusedLogId, setFocusedLogId] = React.useState<string | null>(null);
 
   const getSeverityBadge = (severity: string) => {

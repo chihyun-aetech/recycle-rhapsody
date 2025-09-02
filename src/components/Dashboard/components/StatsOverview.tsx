@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useDashboard } from '../DashboardLayout';
+import { languageAtom } from '@/shared/store/dashboardStore';
+import { useAtom } from 'jotai';
 
 const monthlyStats = [
   { month: 'Jan', throughput: 2800, revenue: 210000, efficiency: 85 },
@@ -13,7 +14,7 @@ const monthlyStats = [
 ];
 
 export const StatsOverview: React.FC = () => {
-  const { language } = useDashboard();
+  const [language] = useAtom(languageAtom);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Progress } from '@/shared/ui';
 import { useDashboard } from '../DashboardLayout';
+import { useAtom } from 'jotai';
+import { languageAtom } from '@/shared/store/dashboardStore';
 
 // 3대 로봇 시스템의 실시간 데이터 (프롬프팅 사양 기반)
 const realTimeData = [
@@ -80,7 +82,7 @@ const robotData = [
 ];
 
 export const RealTimeMetrics: React.FC = () => {
-  const { language } = useDashboard();
+  const [language] = useAtom(languageAtom);
 
   const getStatusColor = (status: string) => {
     switch (status) {

@@ -1,5 +1,5 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { healthStatsApi } from './api';
+import { healthStatsService } from './service';
 import type {
   GetPeriodHealthStatisticsParams,
   GetPeriodHealthStatisticsResponse,
@@ -36,7 +36,7 @@ export const useGetPeriodHealthStatistics = (
 ) => {
   return useQuery({
     queryKey: healthStatsKeys.period(params),
-    queryFn: () => healthStatsApi.getPeriodHealthStatistics(params),
+    queryFn: () => healthStatsService.getPeriodHealthStatistics(params),
     ...options,
   });
 };
@@ -47,7 +47,7 @@ export const useGetTodayHealthSummary = (
 ) => {
   return useQuery({
     queryKey: healthStatsKeys.todaySummary(params),
-    queryFn: () => healthStatsApi.getTodayHealthSummary(params),
+    queryFn: () => healthStatsService.getTodayHealthSummary(params),
     ...options,
   });
 };
@@ -58,7 +58,7 @@ export const useGetWeekHealthSummary = (
 ) => {
   return useQuery({
     queryKey: healthStatsKeys.weekSummary(params),
-    queryFn: () => healthStatsApi.getWeekHealthSummary(params),
+    queryFn: () => healthStatsService.getWeekHealthSummary(params),
     ...options,
   });
 };
@@ -69,7 +69,7 @@ export const useGetMonthHealthSummary = (
 ) => {
   return useQuery({
     queryKey: healthStatsKeys.monthSummary(params),
-    queryFn: () => healthStatsApi.getMonthHealthSummary(params),
+    queryFn: () => healthStatsService.getMonthHealthSummary(params),
     ...options,
   });
 };
@@ -80,7 +80,7 @@ export const useGetSystemHealthOnly = (
 ) => {
   return useQuery({
     queryKey: healthStatsKeys.systemHealth(params),
-    queryFn: () => healthStatsApi.getSystemHealthOnly(params),
+    queryFn: () => healthStatsService.getSystemHealthOnly(params),
     ...options,
   });
 };
@@ -91,7 +91,7 @@ export const useGetMachineHealthOnly = (
 ) => {
   return useQuery({
     queryKey: healthStatsKeys.machineHealth(params),
-    queryFn: () => healthStatsApi.getMachineHealthOnly(params),
+    queryFn: () => healthStatsService.getMachineHealthOnly(params),
     ...options,
   });
 };
@@ -102,7 +102,7 @@ export const useGetAlertsStatsOnly = (
 ) => {
   return useQuery({
     queryKey: healthStatsKeys.alertsStats(params),
-    queryFn: () => healthStatsApi.getAlertsStatsOnly(params),
+    queryFn: () => healthStatsService.getAlertsStatsOnly(params),
     ...options,
   });
 };

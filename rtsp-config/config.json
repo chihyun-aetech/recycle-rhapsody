@@ -1,0 +1,27 @@
+{
+  "server": {
+    "http_port": ":8083",
+    "log_level": "info"
+  },
+  "streams": {
+    "sungnam-atronc-3": {
+      "name": "성남_AtronC_3호기",
+      "channels": {
+        "0": {
+          "name": "Main Stream",
+          "url": "rtsp://admin:Aetech1324!@192.168.0.2/stream1",
+          "on_demand": true,
+          "debug": false,
+          "status": 1
+        },
+        "1": {
+          "name": "Sub Stream",
+          "url": "rtsp://admin:Aetech1324!@192.168.0.2/stream2",
+          "on_demand": true,
+          "debug": false,
+          "status": 1
+        }
+      }
+    }
+  }
+}
