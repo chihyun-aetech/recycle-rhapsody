@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ReactHlsPlayer from 'react-hls-player';
+// @ts-ignore
+import ReactPlayer from 'react-player';
 import { useAtom } from 'jotai';
 import { languageAtom } from '@/shared/store/dashboardStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
@@ -162,42 +163,27 @@ export const CameraStream: React.FC<CameraStreamProps> = ({
                   </div>
                 </div>
               )}
-              {protocol === 'hls' ? (
-                <ReactHlsPlayer
-                  playerRef={playerRef}
+              <div style={{ width: '100%', height: 320, backgroundColor: 'black' }}>
+                {/* @ts-ignore */}
+                <ReactPlayer
+                  key={currentStreamUrl}
+                  playsInline
                   src={currentStreamUrl}
-                  autoPlay={isPlaying}
+                  playing={isPlaying}
                   controls={true}
                   width="100%"
-                  height={320}
-                  onLoadStart={handleLoadStart}
-                  onLoadedData={handleLoadedData}
+                  height="100%"
+                  onProgress={() => setIsLoading(false)}
                   onError={handleError}
-                  hlsConfig={{
-                    maxLoadingDelay: 4,
-                    maxBufferLength: 30,
-                    maxBufferSize: 60 * 1000 * 1000,
+                  onReady={handleLoadedData}
+                  onStart={() => {
+                    setIsLoading(false);
+                    setError(null);
                   }}
+                  onPause={handlePause}
+                  onPlay={handlePlay}
                 />
-              ) : (
-                <video
-                  ref={videoRef}
-                  src={currentStreamUrl}
-                  controls={true}
-                  width="100%"
-                  height={320}
-                  autoPlay={isPlaying}
-                  onLoadStart={handleLoadStart}
-                  onLoadedData={handleLoadedData}
-                  onError={handleError}
-                  className="w-full h-full object-contain"
-                >
-                  <source src={currentStreamUrl} type={protocol === 'rtsp' ? 'application/x-rtsp' : 'video/mp4'} />
-                  {language === 'ko' 
-                    ? '브라우저가 비디오를 지원하지 않습니다.' 
-                    : 'Your browser does not support the video tag.'}
-                </video>
-              )}
+              </div>
             </>
           )}
         </div>
